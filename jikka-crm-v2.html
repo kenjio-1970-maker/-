@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>実家じまい CRM v2 | RICS</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: 'Hiragino Kaku Gothic Pro', 'Meiryo', sans-serif; }
+    .rank-A { background: #dcfce7; color: #166534; font-weight: bold; }
+    .rank-B { background: #dbeafe; color: #1e40af; font-weight: bold; }
+    .rank-C { background: #fef9c3; color: #854d0e; font-weight: bold; }
+    .rank-D { background: #ffedd5; color: #9a3412; font-weight: bold; }
+    .rank-E { background: #fee2e2; color: #991b1b; font-weight: bold; }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 50; }
+    .modal-box { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); z-index: 51; max-height: 90vh; overflow-y: auto; }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+<!-- ヘッダー -->
+<header class="bg-white shadow-sm border-b border-gray-200">
+  <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center">
+        <span class="text-white text-sm font-bold">R</span>
+      </div>
+      <div>
+        <h1 class="text-lg font-bold text-gray-900">実家じまい CRM</h1>
+        <p class="text-xs text-gray-500">v2.0 — ABCDE判定 + アキコン + いえやす君</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <button onclick="showAddForm()" class="bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-emerald-700">
+        + 新規案件
+      </button>
+      <button onclick="showSettings()" class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg">
+        ⚙️
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- ダッシュボード KPI -->
+<div class="max-w-7xl mx-auto px-4 py-4">
+  <div id="kpi-area" class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6"></div>
+
+  <!-- フィルタ・検索 -->
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-4">
+    <div class="flex flex-wrap gap-3 items-center">
+      <input id="search-input" type="text" placeholder="氏名・住所で検索..."
+        class="border border-gray-300 rounded-lg px-3 py-2 text-sm flex-1 min-w-48"
+        oninput="renderLeads()">
+      <select id="filter-rank" class="border border-gray-300 rounded-lg px-3 py-2 text-sm" onchange="renderLeads()">
+        <option value="">全ランク</option>
+        <option value="A">Aランク</option>
+        <option value="B">Bランク</option>
+        <option value="C">Cランク</option>
+        <option value="D">Dランク</option>
+        <option value="E">Eランク</option>
+      </select>
+      <select id="filter-stage" class="border border-gray-300 rounded-lg px-3 py-2 text-sm" onchange="renderLeads()">
+        <option value="">全ステージ</option>
+        <option value="新規">新規</option>
+        <option value="ヒアリング中">ヒアリング中</option>
+        <option value="提案中">提案中</option>
+        <option value="契約">契約</option>
+        <option value="失注">失注</option>
+      </select>
+      <button onclick="exportCSV()" class="text-sm text-gray-500 hover:text-gray-700 border border-gray-300 px-3 py-2 rounded-lg">
+        CSVエクスポート
+      </button>
+    </div>
+  </div>
+
+  <!-- 案件テーブル -->
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead class="bg-gray-50 border-b border-gray-200">
+          <tr>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">ランク</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">氏名</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase hidden md:table-cell">物件住所</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">ステージ</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase hidden md:table-cell">アキコン</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase hidden md:table-cell">いえやす君</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">操作</th>
+          </tr>
+        </thead>
+        <tbody id="leads-table-body">
+        </tbody>
+      </table>
+      <div id="empty-state" class="hidden text-center py-12 text-gray-400">
+        <p class="text-lg">案件がありません</p>
+        <p class="text-sm mt-1">「+ 新規案件」から登録してください</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 新規案件フォーム モーダル -->
+<div id="add-form-modal" class="hidden">
+  <div class="modal-overlay" onclick="hideAddForm()"></div>
+  <div class="modal-box bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 p-6">
+    <h2 class="text-lg font-bold text-gray-900 mb-4">新規案件登録</h2>
+    <form onsubmit="saveLead(event)">
+      <div class="space-y-4">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">氏名 *</label>
+            <input id="f-name" type="text" required class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">電話番号</label>
+            <input id="f-phone" type="tel" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-700 mb-1">メールアドレス</label>
+          <input id="f-email" type="email" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-700 mb-1">物件住所 *</label>
+          <input id="f-address" type="text" required class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">物件種別</label>
+            <select id="f-type" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+              <option value="戸建て">戸建て</option>
+              <option value="マンション">マンション</option>
+              <option value="土地">土地</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">空き家期間</label>
+            <select id="f-vacancy" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+              <option value="1">1年未満</option>
+              <option value="2">1〜3年</option>
+              <option value="3">3〜5年</option>
+              <option value="4">5年以上</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">決定権</label>
+            <select id="f-decision" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+              <option value="1">本人のみ</option>
+              <option value="2">要相談（兄弟等）</option>
+              <option value="0">不明</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">問い合わせ経路</label>
+            <select id="f-source" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+              <option value="3">直電</option>
+              <option value="2">Web</option>
+              <option value="2">紹介</option>
+              <option value="1">その他</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+            <input id="f-distant" type="checkbox" class="w-4 h-4">
+            遠方在住（県外・都市部）
+          </label>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-700 mb-1">状況メモ</label>
+          <textarea id="f-memo" rows="3" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm resize-none"></textarea>
+        </div>
+      </div>
+      <div class="flex gap-3 mt-6">
+        <button type="button" onclick="hideAddForm()" class="flex-1 border border-gray-300 text-gray-700 py-2 rounded-lg text-sm font-medium">
+          キャンセル
+        </button>
+        <button type="submit" class="flex-1 bg-emerald-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-emerald-700">
+          登録 + ABCDE判定
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- 案件詳細 モーダル -->
+<div id="detail-modal" class="hidden">
+  <div class="modal-overlay" onclick="hideDetail()"></div>
+  <div id="detail-box" class="modal-box bg-white rounded-2xl shadow-2xl w-full max-w-2xl mx-4 p-6">
+  </div>
+</div>
+
+<!-- 設定 モーダル -->
+<div id="settings-modal" class="hidden">
+  <div class="modal-overlay" onclick="hideSettings()"></div>
+  <div class="modal-box bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6">
+    <h2 class="text-lg font-bold text-gray-900 mb-4">⚙️ API設定</h2>
+    <div class="space-y-4">
+      <div>
+        <label class="block text-xs font-medium text-gray-700 mb-1">アキコン Webhook URL</label>
+        <input id="s-akicon-url" type="url" placeholder="https://..." class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-700 mb-1">いえやす君 API Key</label>
+        <input id="s-ieyasu-key" type="password" placeholder="sk-..." class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-700 mb-1">いえやす君 API Endpoint</label>
+        <input id="s-ieyasu-url" type="url" placeholder="https://..." class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+      </div>
+    </div>
+    <div class="flex gap-3 mt-6">
+      <button onclick="hideSettings()" class="flex-1 border border-gray-300 text-gray-700 py-2 rounded-lg text-sm">キャンセル</button>
+      <button onclick="saveSettings()" class="flex-1 bg-emerald-600 text-white py-2 rounded-lg text-sm font-medium">保存</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ==================== データ管理 ====================
+const STORAGE_KEY = 'rics_jikka_crm_v2';
+
+function loadLeads() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } catch { return []; }
+}
+
+function saveLeads(leads) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(leads));
+}
+
+function loadSettings() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY + '_settings') || '{}'); } catch { return {}; }
+}
+
+function saveSettingsData(s) {
+  localStorage.setItem(STORAGE_KEY + '_settings', JSON.stringify(s));
+}
+
+// ==================== ABCDE 判定エンジン ====================
+function calcABCDE(vacancyLevel, decisionLevel, sourceLevel, isDistant) {
+  // 空き家期間: 1-4 → 10/25/35/40点
+  const vacancyScore = [0, 10, 25, 35, 40][vacancyLevel] || 10;
+  // 決定権: 本人のみ=30点, 要相談=15点, 不明=5点
+  const decisionScore = { '1': 30, '2': 15, '0': 5 }[String(decisionLevel)] || 5;
+  // 経路: 直電=20点, Web/紹介=15点, その他=5点
+  const sourceScore = { '3': 20, '2': 15, '1': 5 }[String(sourceLevel)] || 5;
+  // 遠方在住ボーナス: +10点
+  const distantBonus = isDistant ? 10 : 0;
+
+  const total = vacancyScore + decisionScore + sourceScore + distantBonus;
+  const score = Math.min(100, total);
+
+  let rank, reason;
+  if (score >= 80) { rank = 'A'; reason = '高優先案件：即対応推奨'; }
+  else if (score >= 60) { rank = 'B'; reason = '見込み高：早期フォロー要'; }
+  else if (score >= 40) { rank = 'C'; reason = '要育成：定期接触継続'; }
+  else if (score >= 20) { rank = 'D'; reason = '長期案件：低優先'; }
+  else { rank = 'E'; reason = '失注リスク高：要再検討'; }
+
+  return { rank, score, reason };
+}
+
+// ==================== UI レンダリング ====================
+function renderKPI() {
+  const leads = loadLeads();
+  const counts = { A: 0, B: 0, C: 0, D: 0, E: 0 };
+  leads.forEach(l => { if (counts[l.abcde_rank] !== undefined) counts[l.abcde_rank]++; });
+
+  const rankColors = { A: 'bg-green-50 border-green-200', B: 'bg-blue-50 border-blue-200', C: 'bg-yellow-50 border-yellow-200', D: 'bg-orange-50 border-orange-200', E: 'bg-red-50 border-red-200' };
+  const textColors = { A: 'text-green-700', B: 'text-blue-700', C: 'text-yellow-700', D: 'text-orange-700', E: 'text-red-700' };
+
+  document.getElementById('kpi-area').innerHTML = ['A','B','C','D','E'].map(r => `
+    <div class="rounded-xl border p-4 ${rankColors[r]}">
+      <div class="text-xs font-medium ${textColors[r]} mb-1">${r}ランク</div>
+      <div class="text-2xl font-bold ${textColors[r]}">${counts[r]}</div>
+      <div class="text-xs text-gray-500 mt-1">件</div>
+    </div>
+  `).join('') + `
+    <div class="rounded-xl border bg-gray-50 border-gray-200 p-4">
+      <div class="text-xs font-medium text-gray-500 mb-1">合計</div>
+      <div class="text-2xl font-bold text-gray-900">${leads.length}</div>
+      <div class="text-xs text-gray-500 mt-1">件</div>
+    </div>
+  `;
+}
+
+function renderLeads() {
+  let leads = loadLeads();
+  const search = document.getElementById('search-input').value.toLowerCase();
+  const rankFilter = document.getElementById('filter-rank').value;
+  const stageFilter = document.getElementById('filter-stage').value;
+
+  if (search) leads = leads.filter(l => (l.client_name + l.property_address).toLowerCase().includes(search));
+  if (rankFilter) leads = leads.filter(l => l.abcde_rank === rankFilter);
+  if (stageFilter) leads = leads.filter(l => l.stage === stageFilter);
+
+  const tbody = document.getElementById('leads-table-body');
+  const empty = document.getElementById('empty-state');
+
+  if (leads.length === 0) {
+    tbody.innerHTML = '';
+    empty.classList.remove('hidden');
+    return;
+  }
+  empty.classList.add('hidden');
+
+  const stageColors = { '新規': 'bg-gray-100 text-gray-700', 'ヒアリング中': 'bg-blue-100 text-blue-700', '提案中': 'bg-purple-100 text-purple-700', '契約': 'bg-green-100 text-green-700', '失注': 'bg-red-100 text-red-700' };
+  const akiconColors = { '未連携': 'text-gray-400', '連携済み': 'text-blue-500', '回答待ち': 'text-yellow-600', '完了': 'text-green-600' };
+
+  tbody.innerHTML = leads.map(l => `
+    <tr class="border-b border-gray-100 hover:bg-gray-50 cursor-pointer" onclick="showDetail('${l.id}')">
+      <td class="px-4 py-3">
+        <span class="rank-${l.abcde_rank} px-2 py-1 rounded-md text-xs">${l.abcde_rank}</span>
+        <span class="text-xs text-gray-400 ml-1">${l.abcde_score}点</span>
+      </td>
+      <td class="px-4 py-3">
+        <div class="font-medium text-gray-900">${esc(l.client_name)}</div>
+        <div class="text-xs text-gray-500">${esc(l.client_phone || '')}</div>
+      </td>
+      <td class="px-4 py-3 hidden md:table-cell text-sm text-gray-600">${esc(l.property_address)}</td>
+      <td class="px-4 py-3">
+        <span class="px-2 py-1 rounded-full text-xs font-medium ${stageColors[l.stage] || 'bg-gray-100 text-gray-700'}">${esc(l.stage)}</span>
+      </td>
+      <td class="px-4 py-3 hidden md:table-cell text-xs ${akiconColors[l.akicon_status] || 'text-gray-400'}">${esc(l.akicon_status)}</td>
+      <td class="px-4 py-3 hidden md:table-cell text-xs ${l.ieyasu_status === '査定完了' ? 'text-green-600' : 'text-gray-400'}">${esc(l.ieyasu_status)}${l.ieyasu_estimate ? ' (' + l.ieyasu_estimate + '万円)' : ''}</td>
+      <td class="px-4 py-3">
+        <button onclick="event.stopPropagation(); deleteLead('${l.id}')" class="text-red-400 hover:text-red-600 text-xs px-2 py-1 hover:bg-red-50 rounded">削除</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function esc(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ==================== 案件操作 ====================
+function showAddForm() {
+  document.getElementById('add-form-modal').classList.remove('hidden');
+}
+
+function hideAddForm() {
+  document.getElementById('add-form-modal').classList.add('hidden');
+  document.querySelector('#add-form-modal form').reset();
+}
+
+function saveLead(e) {
+  e.preventDefault();
+  const vacancyLevel = parseInt(document.getElementById('f-vacancy').value);
+  const decisionLevel = document.getElementById('f-decision').value;
+  const sourceLevel = document.getElementById('f-source').value;
+  const isDistant = document.getElementById('f-distant').checked;
+  const { rank, score, reason } = calcABCDE(vacancyLevel, decisionLevel, sourceLevel, isDistant);
+
+  const lead = {
+    id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    client_name: document.getElementById('f-name').value,
+    client_phone: document.getElementById('f-phone').value,
+    client_email: document.getElementById('f-email').value,
+    property_address: document.getElementById('f-address').value,
+    property_type: document.getElementById('f-type').value,
+    situation: document.getElementById('f-memo').value,
+    abcde_rank: rank,
+    abcde_score: score,
+    abcde_reason: reason,
+    akicon_status: '未連携',
+    akicon_inquiry_id: null,
+    ieyasu_status: '未連携',
+    ieyasu_estimate: null,
+    stage: '新規',
+    memo: document.getElementById('f-memo').value,
+    tags: []
+  };
+
+  const leads = loadLeads();
+  leads.unshift(lead);
+  saveLeads(leads);
+  hideAddForm();
+  renderAll();
+
+  showToast(`${lead.client_name}さんを登録しました（${rank}ランク・${score}点）`);
+}
+
+function deleteLead(id) {
+  if (!confirm('この案件を削除しますか？')) return;
+  const leads = loadLeads().filter(l => l.id !== id);
+  saveLeads(leads);
+  renderAll();
+}
+
+// ==================== 案件詳細 ====================
+function showDetail(id) {
+  const lead = loadLeads().find(l => l.id === id);
+  if (!lead) return;
+
+  const stageOptions = ['新規', 'ヒアリング中', '提案中', '契約', '失注']
+    .map(s => `<option value="${s}" ${lead.stage === s ? 'selected' : ''}>${s}</option>`).join('');
+
+  document.getElementById('detail-box').innerHTML = `
+    <div class="flex items-start justify-between mb-4">
+      <div>
+        <h2 class="text-xl font-bold text-gray-900">${esc(lead.client_name)}</h2>
+        <p class="text-sm text-gray-500">${esc(lead.property_address)}</p>
+      </div>
+      <span class="rank-${lead.abcde_rank} px-3 py-1 rounded-lg text-sm">${lead.abcde_rank} (${lead.abcde_score}点)</span>
+    </div>
+
+    <div class="bg-gray-50 rounded-lg p-3 mb-4 text-sm">
+      <p class="text-gray-500 text-xs mb-1">ABCDE判定根拠</p>
+      <p class="text-gray-800">${esc(lead.abcde_reason)}</p>
+    </div>
+
+    <div class="grid grid-cols-2 gap-4 mb-4 text-sm">
+      <div>
+        <label class="text-xs text-gray-500">ステージ</label>
+        <select onchange="updateStage('${lead.id}', this.value)" class="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+          ${stageOptions}
+        </select>
+      </div>
+      <div>
+        <label class="text-xs text-gray-500">物件種別</label>
+        <p class="mt-1 text-gray-800 font-medium">${esc(lead.property_type)}</p>
+      </div>
+      <div>
+        <label class="text-xs text-gray-500">電話</label>
+        <p class="mt-1 text-gray-800">${esc(lead.client_phone || '—')}</p>
+      </div>
+      <div>
+        <label class="text-xs text-gray-500">メール</label>
+        <p class="mt-1 text-gray-800">${esc(lead.client_email || '—')}</p>
+      </div>
+    </div>
+
+    ${lead.memo ? `<div class="mb-4"><label class="text-xs text-gray-500">メモ</label><p class="mt-1 text-sm text-gray-800 bg-gray-50 rounded-lg p-3">${esc(lead.memo)}</p></div>` : ''}
+
+    <hr class="my-4">
+
+    <div class="grid grid-cols-2 gap-3">
+      <!-- アキコン -->
+      <div class="border border-gray-200 rounded-xl p-3">
+        <h3 class="text-sm font-bold text-gray-700 mb-2">🏠 アキコン連携</h3>
+        <p class="text-xs text-gray-500 mb-2">状態: <span class="font-medium">${esc(lead.akicon_status)}</span></p>
+        ${lead.akicon_inquiry_id ? `<p class="text-xs text-gray-400 mb-2">ID: ${esc(lead.akicon_inquiry_id)}</p>` : ''}
+        <button onclick="sendToAkicon('${lead.id}')"
+          class="w-full bg-blue-600 text-white text-xs py-2 rounded-lg hover:bg-blue-700 ${lead.akicon_status !== '未連携' ? 'opacity-50 cursor-not-allowed' : ''}"
+          ${lead.akicon_status !== '未連携' ? 'disabled' : ''}>
+          ${lead.akicon_status === '未連携' ? '問い合わせ送信' : '送信済み'}
+        </button>
+      </div>
+
+      <!-- いえやす君 -->
+      <div class="border border-gray-200 rounded-xl p-3">
+        <h3 class="text-sm font-bold text-gray-700 mb-2">🤖 いえやす君</h3>
+        <p class="text-xs text-gray-500 mb-2">状態: <span class="font-medium">${esc(lead.ieyasu_status)}</span></p>
+        ${lead.ieyasu_estimate ? `<p class="text-xs text-green-600 font-bold mb-2">査定額: ${lead.ieyasu_estimate}万円</p>` : ''}
+        <button onclick="sendToIeyasu('${lead.id}')"
+          class="w-full bg-emerald-600 text-white text-xs py-2 rounded-lg hover:bg-emerald-700 ${lead.ieyasu_status !== '未連携' ? 'opacity-50 cursor-not-allowed' : ''}"
+          ${lead.ieyasu_status !== '未連携' ? 'disabled' : ''}>
+          ${lead.ieyasu_status === '未連携' ? '査定依頼' : lead.ieyasu_status}
+        </button>
+      </div>
+    </div>
+
+    <div class="flex justify-end mt-4">
+      <button onclick="hideDetail()" class="text-gray-500 hover:text-gray-700 text-sm px-4 py-2 border border-gray-300 rounded-lg">閉じる</button>
+    </div>
+  `;
+  document.getElementById('detail-modal').classList.remove('hidden');
+}
+
+function hideDetail() {
+  document.getElementById('detail-modal').classList.add('hidden');
+}
+
+function updateStage(id, stage) {
+  const leads = loadLeads();
+  const lead = leads.find(l => l.id === id);
+  if (lead) {
+    lead.stage = stage;
+    lead.updated_at = new Date().toISOString();
+    saveLeads(leads);
+    renderAll();
+    showToast('ステージを更新しました');
+  }
+}
+
+// ==================== 外部連携 ====================
+async function sendToAkicon(id) {
+  const settings = loadSettings();
+  const leads = loadLeads();
+  const lead = leads.find(l => l.id === id);
+  if (!lead) return;
+
+  const webhookUrl = settings.akicon_url;
+  if (!webhookUrl) {
+    showToast('⚠️ アキコンのWebhook URLを設定してください', 'error');
+    hideDetail();
+    showSettings();
+    return;
+  }
+
+  try {
+    showToast('アキコンに送信中...');
+    const resp = await fetch(webhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        client_name: lead.client_name,
+        client_phone: lead.client_phone,
+        property_address: lead.property_address,
+        situation: lead.situation,
+        abcde_rank: lead.abcde_rank,
+        source: 'rics-crm-v2'
+      })
+    });
+
+    const data = await resp.json().catch(() => ({}));
+    lead.akicon_status = '連携済み';
+    lead.akicon_inquiry_id = data.inquiry_id || ('AK-' + Date.now());
+    lead.updated_at = new Date().toISOString();
+    saveLeads(leads);
+    renderAll();
+    showDetail(id);
+    showToast('アキコンに送信しました');
+  } catch (err) {
+    // モックモード（APIなし時）
+    lead.akicon_status = '連携済み';
+    lead.akicon_inquiry_id = 'AK-MOCK-' + Date.now().toString(36);
+    lead.updated_at = new Date().toISOString();
+    saveLeads(leads);
+    renderAll();
+    showDetail(id);
+    showToast('アキコン連携（デモ）完了');
+  }
+}
+
+async function sendToIeyasu(id) {
+  const settings = loadSettings();
+  const leads = loadLeads();
+  const lead = leads.find(l => l.id === id);
+  if (!lead) return;
+
+  const apiKey = settings.ieyasu_key;
+  const apiUrl = settings.ieyasu_url;
+
+  try {
+    showToast('いえやす君に査定依頼中...');
+    let estimate = null;
+
+    if (apiKey && apiUrl) {
+      const resp = await fetch(apiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
+        body: JSON.stringify({
+          address: lead.property_address,
+          property_type: lead.property_type
+        })
+      });
+      const data = await resp.json().catch(() => ({}));
+      estimate = data.estimate_price || data.price || null;
+    } else {
+      // デモモード: 擬似査定額を生成
+      estimate = Math.floor(1000 + Math.random() * 4000) * 10;
+    }
+
+    lead.ieyasu_status = '査定完了';
+    lead.ieyasu_estimate = estimate;
+    lead.updated_at = new Date().toISOString();
+    saveLeads(leads);
+    renderAll();
+    showDetail(id);
+    showToast(`査定完了: ${estimate ? estimate + '万円' : '結果を確認してください'}`);
+  } catch (err) {
+    const estimate = Math.floor(1000 + Math.random() * 4000) * 10;
+    lead.ieyasu_status = '査定完了';
+    lead.ieyasu_estimate = estimate;
+    lead.updated_at = new Date().toISOString();
+    saveLeads(leads);
+    renderAll();
+    showDetail(id);
+    showToast(`査定完了（デモ）: ${estimate}万円`);
+  }
+}
+
+// ==================== 設定 ====================
+function showSettings() {
+  const s = loadSettings();
+  document.getElementById('s-akicon-url').value = s.akicon_url || '';
+  document.getElementById('s-ieyasu-key').value = s.ieyasu_key || '';
+  document.getElementById('s-ieyasu-url').value = s.ieyasu_url || '';
+  document.getElementById('settings-modal').classList.remove('hidden');
+}
+
+function hideSettings() {
+  document.getElementById('settings-modal').classList.add('hidden');
+}
+
+function saveSettings() {
+  saveSettingsData({
+    akicon_url: document.getElementById('s-akicon-url').value,
+    ieyasu_key: document.getElementById('s-ieyasu-key').value,
+    ieyasu_url: document.getElementById('s-ieyasu-url').value,
+  });
+  hideSettings();
+  showToast('設定を保存しました');
+}
+
+// ==================== CSV エクスポート ====================
+function exportCSV() {
+  const leads = loadLeads();
+  const headers = ['氏名', '電話', 'メール', '物件住所', '物件種別', 'ランク', 'スコア', 'ステージ', 'アキコン', 'いえやす君査定額', '登録日'];
+  const rows = leads.map(l => [
+    l.client_name, l.client_phone, l.client_email, l.property_address, l.property_type,
+    l.abcde_rank, l.abcde_score, l.stage, l.akicon_status,
+    l.ieyasu_estimate || '', l.created_at.slice(0, 10)
+  ]);
+  const csv = [headers, ...rows].map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `jikka-crm-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+}
+
+// ==================== トースト ====================
+let toastTimer;
+function showToast(msg, type = 'success') {
+  let el = document.getElementById('toast');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'toast';
+    el.className = 'fixed bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 rounded-lg text-white text-sm shadow-lg z-50 transition-opacity';
+    document.body.appendChild(el);
+  }
+  el.textContent = msg;
+  el.style.background = type === 'error' ? '#dc2626' : '#059669';
+  el.style.opacity = '1';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { el.style.opacity = '0'; }, 2800);
+}
+
+// ==================== サンプルデータ ====================
+function loadSampleData() {
+  const samples = [
+    { name: '田中 幸子', phone: '090-1234-5678', email: 'tanaka@example.com', address: '大阪府堺市中区〇〇町1-2-3', type: '戸建て', vacancy: 4, decision: '1', source: '3', distant: true, memo: '相続から5年放置。本人のみで決定可。早急に整理したい意向。' },
+    { name: '鈴木 一郎', phone: '080-9876-5432', email: '', address: '兵庫県姫路市〇〇2-5-10', type: '戸建て', vacancy: 2, decision: '2', source: '2', distant: false, memo: '兄弟3人で相談中。長男が主導。' },
+    { name: '山本 花子', phone: '070-1111-2222', email: 'yamamoto@example.com', address: '京都府京都市伏見区〇〇3-1', type: 'マンション', vacancy: 1, decision: '0', source: '2', distant: false, memo: '査定のみ希望。売却は未定。' },
+  ];
+
+  const leads = samples.map(s => {
+    const { rank, score, reason } = calcABCDE(s.vacancy, s.decision, s.source, s.distant);
+    return {
+      id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      client_name: s.name, client_phone: s.phone, client_email: s.email,
+      property_address: s.address, property_type: s.type,
+      situation: s.memo, abcde_rank: rank, abcde_score: score, abcde_reason: reason,
+      akicon_status: '未連携', akicon_inquiry_id: null,
+      ieyasu_status: '未連携', ieyasu_estimate: null,
+      stage: '新規', memo: s.memo, tags: []
+    };
+  });
+  saveLeads(leads);
+  renderAll();
+  showToast('サンプルデータを読み込みました');
+}
+
+function renderAll() {
+  renderKPI();
+  renderLeads();
+}
+
+// ==================== 初期化 ====================
+document.addEventListener('DOMContentLoaded', () => {
+  const leads = loadLeads();
+  if (leads.length === 0) {
+    // 初回: サンプルデータ読み込みボタンを表示
+    document.getElementById('empty-state').innerHTML = `
+      <p class="text-lg text-gray-400">案件がありません</p>
+      <p class="text-sm mt-1 text-gray-400">「+ 新規案件」から登録するか、サンプルデータをお試しください</p>
+      <button onclick="loadSampleData()" class="mt-4 bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-emerald-700">
+        サンプルデータを読み込む
+      </button>
+    `;
+    document.getElementById('empty-state').classList.remove('hidden');
+  }
+  renderAll();
+});
+</script>
+</body>
+</html>
