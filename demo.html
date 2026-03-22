@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>実家じまい CRM v2 — デモ</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Hiragino Kaku Gothic Pro','Meiryo',sans-serif;background:#0f172a;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+#bar{background:#1e293b;color:#e2e8f0;padding:8px 16px;display:flex;align-items:center;gap:10px;font-size:12px;flex-shrink:0}
+#scene-label{flex:1;font-weight:600;font-size:13px}
+#pb-wrap{flex:0 0 180px;background:#334155;border-radius:4px;height:4px}
+#pb{height:4px;border-radius:4px;background:#10b981;transition:width 0.5s linear}
+#ctr{color:#94a3b8;font-size:11px}
+.ctrl-btn{background:#334155;border:none;color:#e2e8f0;padding:4px 10px;border-radius:4px;cursor:pointer;font-size:12px}
+.ctrl-btn:hover{background:#475569}
+#screen{flex:1;position:relative;overflow:hidden}
+.scene{position:absolute;inset:0;opacity:0;transform:translateY(6px);transition:opacity .35s,transform .35s;pointer-events:none;background:#f8fafc;overflow-y:auto}
+.scene.active{opacity:1;transform:translateY(0);pointer-events:all}
+#note{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:#1e293b;color:#f1f5f9;padding:9px 20px;border-radius:24px;font-size:12px;max-width:560px;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.35);opacity:0;transition:opacity .4s;pointer-events:none;z-index:99}
+#note.show{opacity:1}
+.crm-header{background:white;border-bottom:1px solid #e2e8f0;padding:10px 20px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.logo-sm{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:700;color:#111827}
+.logo-sm::before{content:'R';display:inline-flex;width:28px;height:28px;background:#059669;border-radius:7px;align-items:center;justify-content:center;color:white;font-size:12px;font-weight:900}
+.btn-green{background:#059669;color:white;border:none;padding:7px 14px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer}
+.body-pad{max-width:860px;margin:0 auto;padding:18px}
+.kpi-row{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:16px}
+.kpi{border-radius:10px;padding:12px;border:1px solid}.kl{font-size:10px;font-weight:700;margin-bottom:4px}.kn{font-size:22px;font-weight:800}.ku{font-size:10px;color:#6b7280;margin-top:2px}
+.kpi-a{background:#dcfce7;border-color:#86efac}.kpi-a .kl,.kpi-a .kn{color:#166534}
+.kpi-b{background:#dbeafe;border-color:#93c5fd}.kpi-b .kl,.kpi-b .kn{color:#1e40af}
+.kpi-c{background:#fef9c3;border-color:#fde047}.kpi-c .kl,.kpi-c .kn{color:#854d0e}
+.kpi-d{background:#ffedd5;border-color:#fdba74}.kpi-d .kl,.kpi-d .kn{color:#9a3412}
+.kpi-e{background:#fee2e2;border-color:#fca5a5}.kpi-e .kl,.kpi-e .kn{color:#991b1b}
+.kpi-t{background:#f1f5f9;border-color:#cbd5e1}.kpi-t .kl,.kpi-t .kn{color:#1e293b}
+.card{background:white;border-radius:12px;border:1px solid #e2e8f0;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead{background:#f8fafc}
+th{padding:9px 12px;text-align:left;font-size:10px;font-weight:600;color:#6b7280;text-transform:uppercase;border-bottom:1px solid #e2e8f0}
+td{padding:9px 12px;border-bottom:1px solid #f1f5f9}
+tr:last-child td{border-bottom:none}
+.rank{display:inline-block;padding:2px 7px;border-radius:4px;font-size:11px;font-weight:700}
+.rA{background:#dcfce7;color:#166534}.rB{background:#dbeafe;color:#1e40af}.rC{background:#fef9c3;color:#854d0e}
+.stg{display:inline-block;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:500}
+.stg-new{background:#f1f5f9;color:#475569}.stg-hear{background:#dbeafe;color:#1e40af}.stg-prop{background:#f3e8ff;color:#6b21a8}.stg-cont{background:#dcfce7;color:#166534}
+.ok{color:#059669;font-weight:600;font-size:12px}.wait{color:#d97706;font-weight:600;font-size:12px}.none{color:#9ca3af;font-size:12px}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:10}
+.modal{background:white;border-radius:14px;padding:22px;width:420px;max-width:95%;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.modal-title{font-size:14px;font-weight:700;color:#111827;margin-bottom:14px}
+.form-row2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.fg{margin-bottom:8px}.fl{font-size:10px;font-weight:600;color:#374151;margin-bottom:3px}
+.fi{border:1px solid #d1d5db;border-radius:6px;padding:6px 9px;font-size:12px;color:#111827;background:#f9fafb}
+.fi.filled{border-color:#059669;background:white}
+.fi-btn{border-radius:7px;padding:9px;font-size:12px;font-weight:600;text-align:center;cursor:pointer}
+.fi-cancel{border:1px solid #d1d5db;color:#374151}.fi-submit{background:#059669;color:white;border:none}
+.title-screen{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(135deg,#f0fdf4,#dbeafe);padding:20px;text-align:center}
+.logo{width:64px;height:64px;background:#059669;border-radius:18px;display:flex;align-items:center;justify-content:center;color:white;font-size:30px;font-weight:900;margin-bottom:20px;box-shadow:0 8px 24px rgba(5,150,105,.3)}
+h1{font-size:26px;font-weight:900;color:#111827;margin-bottom:8px}
+.v2{color:#059669}.tagline{font-size:14px;color:#374151;margin-bottom:20px}
+.badges{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:20px}
+.badge{border-radius:20px;padding:5px 13px;font-size:12px;font-weight:600}
+.badge-a{background:#dcfce7;color:#166534}.badge-b{background:#dbeafe;color:#1e40af}.badge-c{background:#fef9c3;color:#854d0e}
+.sub{font-size:12px;color:#9ca3af}
+.result-card{background:white;border-radius:16px;border:2px solid #86efac;padding:28px;text-align:center;max-width:360px;box-shadow:0 4px 20px rgba(5,150,105,.15)}
+.result-name{font-size:13px;color:#6b7280;margin-bottom:8px}
+.rA-big{font-size:80px;font-weight:900;color:#059669;line-height:1;animation:pop .5s cubic-bezier(.34,1.56,.64,1)}
+@keyframes pop{from{transform:scale(0.4);opacity:0}to{transform:scale(1);opacity:1}}
+.result-score{font-size:18px;font-weight:700;color:#374151;margin-top:6px}
+.result-reason{font-size:12px;color:#6b7280;margin-top:4px;margin-bottom:14px}
+.score-breakdown{background:#f8fafc;border-radius:8px;padding:12px;text-align:left;font-size:12px}
+.sb-row{display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #f1f5f9}
+.sb-row:last-child{border:none}.sb-pt{color:#059669;font-weight:600}
+.detail-sec-title{font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;padding-bottom:4px;border-bottom:1px solid #f1f5f9;margin-bottom:8px}
+.svc-row{display:flex;align-items:center;justify-content:space-between;background:#f8fafc;border-radius:8px;padding:10px 12px}
+.svc-name{font-size:13px;font-weight:600;color:#374151}.svc-status{font-size:11px;margin-top:2px}
+.ok2{color:#059669}.none2{color:#9ca3af}.wait2{color:#d97706}
+.btn-svc{background:#059669;color:white;border:none;padding:5px 11px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer}
+.hl-btn{box-shadow:0 0 0 3px #10b981,0 0 16px rgba(16,185,129,.4);animation:pulse 1.5s ease-in-out infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 3px #10b981,0 0 16px rgba(16,185,129,.4)}50%{box-shadow:0 0 0 5px #10b981,0 0 28px rgba(16,185,129,.6)}}
+.hl-stg{box-shadow:0 0 0 2px #10b981;animation:pulse 1.5s ease-in-out infinite}
+.estimate-card{background:white;border-radius:16px;border:2px solid #93c5fd;padding:28px;text-align:center;max-width:380px;box-shadow:0 4px 20px rgba(59,130,246,.15)}
+.estimate-price{font-size:54px;font-weight:900;color:#1e40af;line-height:1;animation:pop .5s cubic-bezier(.34,1.56,.64,1)}
+.estimate-label{font-size:13px;color:#6b7280;margin-top:6px}
+.estimate-conf{display:inline-block;background:#dbeafe;color:#1e40af;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;margin-top:10px;margin-bottom:4px}
+.summary-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:20px;max-width:640px}
+.sum-card{background:white;border-radius:12px;padding:18px;box-shadow:0 2px 8px rgba(0,0,0,.08);text-align:center}
+.sum-icon{font-size:28px;margin-bottom:8px}
+.sum-title{font-size:13px;font-weight:700;color:#111827;margin-bottom:4px}
+.sum-desc{font-size:11px;color:#6b7280;line-height:1.5}
+</style>
+</head>
+<body>
+<div id="bar">
+  <span id="scene-label"></span>
+  <div id="pb-wrap"><div id="pb" style="width:0%"></div></div>
+  <span id="ctr"></span>
+  <button class="ctrl-btn" onclick="prev()">◀ 前へ</button>
+  <button class="ctrl-btn" id="btn-play" onclick="togglePlay()">⏸ 一時停止</button>
+  <button class="ctrl-btn" onclick="next()">次へ ▶</button>
+</div>
+<div id="screen">
+<div class="scene" id="s0">
+<div class="title-screen">
+  <div class="logo">R</div>
+  <h1>実家じまい CRM <span class="v2">v2</span></h1>
+  <p class="tagline">空き家・実家の整理をワンストップで管理</p>
+  <div class="badges">
+    <span class="badge badge-a">ABCDE判定</span>
+    <span class="badge badge-b">アキコン連携</span>
+    <span class="badge badge-c">いえやす君連携</span>
+  </div>
+  <p class="sub">← → キーまたはボタンで操作 / 自動再生あり</p>
+</div>
+</div>
+<div class="scene" id="s1">
+<div class="crm-header">
+  <div class="logo-sm">R <span>実家じまい CRM v2</span></div>
+  <button class="btn-green">+ 新規案件</button>
+</div>
+<div class="body-pad">
+  <div class="kpi-row">
+    <div class="kpi kpi-a"><div class="kl">Aランク</div><div class="kn">3</div><div class="ku">件</div></div>
+    <div class="kpi kpi-b"><div class="kl">Bランク</div><div class="kn">5</div><div class="ku">件</div></div>
+    <div class="kpi kpi-c"><div class="kl">Cランク</div><div class="kn">4</div><div class="ku">件</div></div>
+    <div class="kpi kpi-d"><div class="kl">Dランク</div><div class="kn">2</div><div class="ku">件</div></div>
+    <div class="kpi kpi-e"><div class="kl">Eランク</div><div class="kn">1</div><div class="ku">件</div></div>
+    <div class="kpi kpi-t"><div class="kl">合計</div><div class="kn">15</div><div class="ku">件</div></div>
+  </div>
+</div>
+</div>
+<div class="scene" id="s2">
+<div class="crm-header">
+  <div class="logo-sm">R <span>実家じまい CRM v2</span></div>
+  <button class="btn-green hl-btn">+ 新規案件</button>
+</div>
+<div class="body-pad">
+  <div class="card">
+    <table>
+      <thead><tr><th>ランク</th><th>氏名</th><th>物件住所</th><th>ステージ</th><th>アキコン</th><th>いえやす君</th></tr></thead>
+      <tbody>
+        <tr><td><span class="rank rA">A</span> 85点</td><td>山田 太郎</td><td>神奈川県横浜市 戸建て</td><td><span class="stg stg-hear">ヒアリング中</span></td><td><span class="ok">連携済み</span></td><td><span class="ok">査定完了</span></td></tr>
+        <tr><td><span class="rank rA">A</span> 82点</td><td>鈴木 花子</td><td>埼玉県さいたま市 戸建て</td><td><span class="stg stg-prop">提案中</span></td><td><span class="ok">完了</span></td><td><span class="ok">査定完了</span></td></tr>
+        <tr><td><span class="rank rB">B</span> 70点</td><td>佐藤 一郎</td><td>千葉県船橋市 マンション</td><td><span class="stg stg-hear">ヒアリング中</span></td><td><span class="wait">回答待ち</span></td><td><span class="none">未連携</span></td></tr>
+        <tr><td><span class="rank rB">B</span> 65点</td><td>田中 美穂</td><td>東京都世田谷区 戸建て</td><td><span class="stg stg-new">新規</span></td><td><span class="none">未連携</span></td><td><span class="none">未連携</span></td></tr>
+        <tr><td><span class="rank rC">C</span> 52点</td><td>高橋 健二</td><td>群馬県前橋市 土地</td><td><span class="stg stg-new">新規</span></td><td><span class="none">未連携</span></td><td><span class="none">未連携</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+</div>
+<div class="scene" id="s3">
+<div class="crm-header"><div class="logo-sm">R <span>実家じまい CRM v2</span></div></div>
+<div class="overlay">
+  <div class="modal">
+    <div class="modal-title">新規案件登録</div>
+    <div class="form-row2">
+      <div class="fg"><div class="fl">氏名 *</div><div class="fi filled">中村 洋子</div></div>
+      <div class="fg"><div class="fl">電話番号</div><div class="fi filled">090-1234-5678</div></div>
+    </div>
+    <div class="fg"><div class="fl">物件住所 *</div><div class="fi filled">静岡県浜松市中区 戸建て</div></div>
+    <div class="form-row2">
+      <div class="fg"><div class="fl">空き家期間</div><div class="fi filled">5年以上</div></div>
+      <div class="fg"><div class="fl">決定権</div><div class="fi filled">本人のみ</div></div>
+    </div>
+    <div class="form-row2">
+      <div class="fg"><div class="fl">問い合わせ経路</div><div class="fi filled">直電</div></div>
+      <div class="fg"><div class="fl">遠方在住</div><div class="fi filled">✓ 県外在住</div></div>
+    </div>
+    <div class="fg"><div class="fl">状況メモ</div><div class="fi filled" style="height:52px">両親他界後5年放置。兄弟1名あり同意済み。早期売却希望。</div></div>
+    <div class="form-row2" style="margin-top:12px">
+      <div class="fi-btn fi-cancel">キャンセル</div>
+      <div class="fi-btn fi-submit hl-btn">登録 + ABCDE判定</div>
+    </div>
+  </div>
+</div>
+</div>
+<div class="scene" id="s4">
+<div class="crm-header"><div class="logo-sm">R <span>実家じまい CRM v2</span></div></div>
+<div class="body-pad" style="display:flex;justify-content:center;padding-top:40px">
+  <div class="result-card">
+    <div class="result-name">中村 洋子 さん</div>
+    <div class="result-rank rA-big">A</div>
+    <div class="result-score">スコア：90点 / 100点</div>
+    <div class="result-reason">高優先案件：即対応推奨</div>
+    <div class="score-breakdown">
+      <div class="sb-row"><span>空き家期間（5年以上）</span><span class="sb-pt">+40点</span></div>
+      <div class="sb-row"><span>決定権（本人のみ）</span><span class="sb-pt">+30点</span></div>
+      <div class="sb-row"><span>問い合わせ経路（直電）</span><span class="sb-pt">+20点</span></div>
+      <div class="sb-row"><span>遠方在住ボーナス</span><span class="sb-pt">+10点</span></div>
+    </div>
+  </div>
+</div>
+</div>
+<div class="scene" id="s5">
+<div class="crm-header"><div class="logo-sm">R <span>実家じまい CRM v2</span></div></div>
+<div class="overlay">
+  <div class="modal" style="width:520px">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px">
+      <span class="rank rA">A</span>
+      <span style="font-weight:700;font-size:15px">中村 洋子</span>
+      <span style="font-size:12px;color:#6b7280">静岡県浜松市中区</span>
+    </div>
+    <div class="detail-sec-title">外部サービス連携</div>
+    <div class="svc-row">
+      <div>
+        <div class="svc-name">アキコン（空き家コンサル）</div>
+        <div class="svc-status wait">● 回答待ち → <b class="ok2">連携済み</b> に更新中...</div>
+      </div>
+      <button class="btn-svc hl-btn">送客済み</button>
+    </div>
+    <div class="svc-row" style="margin-top:8px">
+      <div>
+        <div class="svc-name">いえやす君（不動産査定AI）</div>
+        <div class="svc-status none2">● 未連携</div>
+      </div>
+      <button class="btn-svc">査定依頼</button>
+    </div>
+    <div class="detail-sec-title" style="margin-top:16px">ステージ</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <span class="stg stg-new">新規</span>
+      <span class="stg stg-hear hl-stg">ヒアリング中 ✓</span>
+      <span class="stg stg-prop">提案中</span>
+      <span class="stg stg-cont">契約</span>
+    </div>
+  </div>
+</div>
+</div>
+<div class="scene" id="s6">
+<div class="crm-header"><div class="logo-sm">R <span>実家じまい CRM v2</span></div></div>
+<div class="body-pad" style="display:flex;justify-content:center;padding-top:40px">
+  <div class="estimate-card">
+    <div class="result-name">中村 洋子 さん — いえやす君 査定結果</div>
+    <div class="estimate-price">1,480<span style="font-size:24px;font-weight:600">万円</span></div>
+    <div class="estimate-label">AI推定売却価格（静岡県浜松市中区 戸建て）</div>
+    <div class="estimate-conf">信頼度：高 (87%)</div>
+    <div class="score-breakdown" style="margin-top:16px">
+      <div class="sb-row"><span>周辺成約事例（3件）</span><span class="sb-pt">参照済み</span></div>
+      <div class="sb-row"><span>築年数・面積補正</span><span class="sb-pt">適用済み</span></div>
+      <div class="sb-row"><span>空き家期間割引</span><span class="sb-pt">-5%</span></div>
+    </div>
+  </div>
+</div>
+</div>
+<div class="scene" id="s7">
+<div class="title-screen">
+  <div class="logo">R</div>
+  <h1 style="margin-bottom:8px">実家じまい CRM v2</h1>
+  <div class="summary-grid">
+    <div class="sum-card">
+      <div class="sum-icon">📊</div>
+      <div class="sum-title">ABCDE 自動判定</div>
+      <div class="sum-desc">登録即スコアリング<br>最優先案件を見逃さない</div>
+    </div>
+    <div class="sum-card">
+      <div class="sum-icon">🏚️</div>
+      <div class="sum-title">アキコン連携</div>
+      <div class="sum-desc">ワンクリックで送客<br>空き家活用の専門相談へ</div>
+    </div>
+    <div class="sum-card">
+      <div class="sum-icon">🤖</div>
+      <div class="sum-title">いえやす君連携</div>
+      <div class="sum-desc">AI自動査定で即提案<br>信頼度付き価格を取得</div>
+    </div>
+  </div>
+  <p class="sub" style="margin-top:24px">データはすべてブラウザローカル保存（要件次第でクラウド移行可）</p>
+</div>
+</div>
+</div>
+<div id="note"></div>
+<script>
+window.SCENE_DATA = [{"title": "はじめに", "note": "実家じまいCRM v2 のデモを開始します"}, {"title": "ダッシュボード — KPIカード", "note": "A〜Eランク別の案件数が一目でわかります"}, {"title": "案件一覧テーブル", "note": "ランク・ステージ・連携状況が一覧で確認できます"}, {"title": "新規案件登録フォーム", "note": "「+ 新規案件」をクリックするとフォームが開きます"}, {"title": "ABCDE 自動判定結果", "note": "登録と同時にスコアリングエンジンが動作し、ランクを自動付与します"}, {"title": "案件詳細 — アキコン連携", "note": "「アキコンへ送客」をクリックするだけで問い合わせが送信されます"}, {"title": "いえやす君 — AI査定完了", "note": "物件住所を送るだけでAIが自動査定。結果が案件に紐づきます"}, {"title": "まとめ — v2 機能一覧", "note": "3つの新機能で、案件対応スピードと成約率を向上させます"}];
+
+const scenes = 8;
+let cur = 0, timer = null, playing = true, interval = 6000;
+
+function goTo(n) {
+  document.querySelectorAll('.scene').forEach((s,i)=>s.classList.toggle('active',i===n));
+  cur = n;
+  const data = window.SCENE_DATA[n];
+  document.getElementById('scene-label').textContent = (n+1) + '/' + scenes + ' — ' + data.title;
+  document.getElementById('ctr').textContent = (n+1) + '/' + scenes;
+  document.getElementById('pb').style.width = ((n+1)/scenes*100) + '%';
+  const note = document.getElementById('note');
+  note.textContent = data.note;
+  note.classList.remove('show');
+  setTimeout(()=>note.classList.add('show'), 200);
+}
+
+function next() { goTo((cur+1) % scenes); }
+function prev() { goTo((cur-1+scenes) % scenes); }
+
+function togglePlay() {
+  playing = !playing;
+  document.getElementById('btn-play').textContent = playing ? '⏸ 一時停止' : '▶ 再生';
+  if (playing) startTimer(); else { clearInterval(timer); timer=null; }
+}
+
+function startTimer() {
+  clearInterval(timer);
+  timer = setInterval(next, interval);
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key==='ArrowRight'||e.key===' ') { e.preventDefault(); next(); if(playing){clearInterval(timer);startTimer();} }
+  if (e.key==='ArrowLeft') { e.preventDefault(); prev(); if(playing){clearInterval(timer);startTimer();} }
+  if (e.key==='p'||e.key==='P') togglePlay();
+});
+
+goTo(0);
+if (playing) startTimer();
+
+</script>
+</body>
+</html>
