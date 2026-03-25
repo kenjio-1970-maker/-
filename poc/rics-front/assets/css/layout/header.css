@@ -1,0 +1,8 @@
+/* 定义页头的样式 */
+.el-dialog{
+    margin: 5% auto;
+}
+
+.el-dialog__footer{
+    padding-top: 0px;
+}

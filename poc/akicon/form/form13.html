@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <title>アキコン｜実家じまい相談サービス</title>
+    <!-- meta情報 -->
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- noindex 検索させたくない時だけ入れる-->
+    <meta name="robots" content="noindex, nofollow" />
+    <meta content="" name="description" />
+    <meta content="" name="keywords" />
+    <!-- OGP情報 -->
+    <!-- ページのタイトル -->
+    <meta property="og:title" content="実家じまいのご相談は「アキコン」へ">
+    <!-- ページの説明 -->
+    <meta property="og:description" content="実家じまいサービスが提供する「アキコン」。無料相談、現地調査、相場レポート送付のお申込みはこちらから。">
+    <!-- ページのイメージ画像 -->
+    <meta property="og:image" content="https://akiconsys.com/akicon/akicon-ogp.png" />
+    <!-- ファビコン -->
+    <link rel="shortcut icon" href="https://akiconsys.com/akicon/favicon.ico" />
+    <!-- iOSデバイス（iPhone・iPad） で Webサイトをホーム画面に追加したときに表示されるアイコン を指定するタグ -->
+    <link rel="apple-touch-icon" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" href="../android-chrome-192x192.png" />
+    <!-- Googleフォント -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Noto+Sans+JP:wght@100..900&family=Noto+Serif+JP:wght@200..900&display=swap"
+      rel="stylesheet"
+    />
+    <!-- css -->
+    <link href="../css/reset.css" rel="stylesheet" />
+    <link href="../css/form.css" rel="stylesheet" />
+    <script type="module" defer src="../js/checkTokenExists.js"></script>
+    <script type="module" defer src="../js/form13.js"></script>
+  </head>
+
+  <body class="slide__body">
+      <!-- ヘッダー -->
+      <header class="header form__header">
+        <h1 class="header__logo aki-logo"><img src="../images/aki-logo.png" alt="アキコン" /></h1>
+        <div class="form__title-wrapper">
+          <h2 class="form__title">実家じまい相談フォーム</h2>
+              <p class="form__title-text">下記フォームからお客様のご実家に関する情報をご入力ください。</p>
+        </div>
+      </header>
+      <main class="main form13__main">
+        <div class="inner">
+        <section class="form__container">
+          <div class="form__bg">
+            <div class="inner form__inner">
+              <div class="form__box">
+                <div class="box__bg">
+                  <div class="box__inner">
+                    <h3 class="form__q">Q13. 相場レポート送付について</h3>
+                    <div class="form13__box">
+                      <div class="form__inner">
+                        <form class="form13">
+                          <p>(1) レポート送付希望手段をお聞かせください。<span class="form__q-span form13__q-span">(必須)</span><span class="form__q-span02 form13__q-span02">※いずれか一つを選択</span></p>
+                          <div class="form13__q-1">
+                            <div class="form13__q-inner">
+                              <label class="form13__input">
+                                <span class="radio__inner">
+                                <input type="radio" name="Q13(1)-1" value="1"> メールを希望する<span class="form13__radio-text-span">※即日配信</span></span>
+                              </label>
+                              <div class="form13">
+                                <label></label>
+                                <input type="email" class="form13__mailaddress-text mailaddress-text" placeholder="example@***.com" name="Q13(1)-2">
+                              </div>
+                              <div>
+                                <label></label>
+                                <input type="email" class="form13__mailaddress-text form13__mailaddress-text02 mailaddress-text" name="Q13(1)-2-again" placeholder="確認のため、再度ご記入ください。">
+                              </div>
+                            </div>
+                            <div class="form13__q-inner">
+                              <label>
+                                <span class="radio__inner">
+                                <input type="radio" name="Q13(1)-1" value="2"> 郵送を希望する <span class="form13__radio-text-span">※3営業日以内に郵送(土日祝除く)</span></span>
+                              </label>
+                              <p class="form13__text">ご入力いただいた「現在お住まいのご住所」へ郵送いたします。</p>
+                            </div>
+                          </div>
+                        </form>
+                        <form class="form13-2">
+                          <p>(2)相談者様以外にもレポート送付をご希望の場合は、以下、ご入力ください。(任意)</p>
+                          <div class="form13__address-box">
+                              <label class="form13__box-label">宛名</label>
+                                <input type="text" class="form13__mailaddress-text" maxlength="300" name="Q13(2)-1">
+                            </div>
+                            <div class="form13__address-box">
+                              <label class="form13__box-label">送付先</label>
+                              <input type="email" class="form13__mailaddress-text" placeholder="jikkajimai@***.com" name="Q13(2)-2">
+                            </div>
+                            <div class="form13__address-box">
+                              <label class="form13__box-label"></label>
+                              <input type="email" class="form13__mailaddress-text" name="Q13(2)-2-again" placeholder="確認のため、再度ご記入ください。">
+                            </div>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+      </main>
+      <footer class="slide__footer form__footer">
+        <a href="../slide00/" class="top__btn" onclick="return showConfirmModal()">トップページ</a>
+        <div>
+          <a href="../form/form12.html" class="back__btn">もどる</a>
+          <a href="../form/confirm.html" class="next__btn">すすむ</a>
+        </div>
+      </footer>
+      <!-- 引入确认模态框 -->
+      <div id="confirmModalContainer"></div>
+  </body>
+</html>

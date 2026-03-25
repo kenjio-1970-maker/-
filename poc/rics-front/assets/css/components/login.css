@@ -1,0 +1,91 @@
+/* 标题样式：居中显示，字体加粗并放大 */
+.header-center {
+    text-align: center; /* 水平居中 */
+    font-size: 24px; /* 调整字体更大 */
+    font-weight: bold; /* 加粗字体 */
+    margin-bottom: -10px;
+    color: #676781;
+    /* padding-top: 20px; */
+    margin-top: 10px;
+  }
+  
+  /* 卡片样式：设置固定宽高、圆角和居中 */
+  .box-card {
+    width: 400px; /* 设置固定宽度 */
+    height: 300px; /* 设置固定高度 */
+    border-radius: 20px; /* 添加圆角 */
+    display: flex; /* 使用 flex 布局 */
+    flex-direction: column; /* 垂直排列子元素 */
+    align-items: center; /* 水平居中 */
+    justify-content: center; /* 垂直居中 */
+   background-color: #dceff7;  /* 设置背景色为浅灰色 */
+    /* background-color: rgba(0, 0, 0, 0.99); /* 添加透明背景色 */
+  }
+  
+  /* 表单样式 */
+  .form-style {
+    margin-top: 25px;
+  }
+  
+  /* 共同样式：宽度和阴影 */
+  .common-style {
+    width: 350px !important; /* 设置固定宽度 */
+    margin: 0 auto; /* 居中对齐 */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* 添加阴影 */
+    transition: box-shadow 0.3s ease; /* 添加过渡效果 */
+  }
+  
+  .common-style:hover {
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15); /* 鼠标悬停时加深阴影 */
+  }
+  
+  /* 输入框样式 */
+  .input-style {
+    height: 50px; /* 增加高度 */
+    /* background-color: #f5f5f5; 设置背景色与卡片一致 */
+    border: none; /* 移除边框 */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* 添加阴影 */
+    /* position: relative; 确保背景色正确应用 */
+    transition: box-shadow 0.3s ease; /* 添加过渡效果 */
+  }
+
+  .input-style:hover {
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15); /* 鼠标悬停时加深阴影 */
+  }
+
+  /* 输入框内部样式 */
+  .input-style::placeholder {
+    color: #a9a9a9; /* 设置占位符颜色 */
+    opacity: 1; /* 确保占位符可见 */
+  }
+  
+  /* 按钮样式 */
+  .button-style {
+    margin: 20px 0px -5px 0px; /* 设置按钮的外边距 */
+    border-radius: 15px !important; /* 设置圆角 */
+    height: 50px; /* 增加高度 */
+    background-color: #a3cfed; /* 设置按钮背景色 */
+    color: #6a6969;
+    font-weight: bold; /* 设置文字加粗 */
+    border-color: #a3cfed;
+  }
+  
+  /* 图标样式：调整图标大小 */
+  .icon-style ::v-deep(.el-input__prefix) {
+    font-size: 22px; /* 调整图标大小 */
+  }
+  
+  /* 相对定位容器 */
+  .relative-container {
+    position: relative; /* 设置相对定位 */
+  }
+  
+  /* 错误信息样式 */
+  .error-message {
+    position: absolute; /* 绝对定位 */
+    bottom: -30px; /* 调整位置，放置在输入框下方，避免遮挡 */
+    left: 0; /* 靠左对齐 */
+    color: red; /* 设置文字颜色为红色 */
+    font-size: 14px; /* 设置字体大小 */
+    text-align: left; /* 靠左对齐 */
+  }

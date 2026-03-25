@@ -1,0 +1,236 @@
+/* 定义表单组件的样式 */
+
+
+/* 公共Card组件 Card头样式 */
+.card-header{
+    /* background-color: #D6E4EF; */
+    color: #0078D7;
+    /* padding-left: 20px; */
+    padding: 10px 20px 15px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 5px 5px 0 0;
+    margin-bottom: 10px;
+}
+
+/* 公共Card组件 Card头样式 - 大标签 */
+.el-card__header{
+    /* padding: 上 右 下 左; */
+    padding: 12px 20px 5px 0px;
+    /* padding: 10px; */
+    padding-left: 1px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 5px 5px 0 0;
+    margin-bottom: -10px;
+}
+
+/* el-card体, 可修改body体内部与上下间隔, 不包括List页面的el-card */
+.el-form .el-card__body {
+    padding-top: 20px;
+    /* padding-bottom: 0px; */
+    
+    /* padding: 0px 20px 0px 20px; */
+    /* padding: 10px; */
+    /* margin-bottom: -10px; */
+    /* padding-bottom: 0px; */
+}
+
+/* 公共Search组件样式 */
+.search-cls {
+    /* margin: 10px; */
+    padding: 5px;
+    border-radius: 4px;
+    margin-left: 0px;
+}
+
+/* 公共Table组件样式 */
+.result-paging {
+    border-radius: 4px;
+    align-items: center;
+    margin-top: 10px;
+    margin-left: 0px;
+}
+
+/* 为所有 el-form-item div标签设置左右间距 */
+.el-form-item {
+    margin-left: 2px;
+    margin-right: 2px;
+    /*  margin-top: 2px;  */
+    /* margin-bottom: 2px; */
+    flex: 1; /* 让表单项占满可用空间 */
+}
+
+/* 详情页面明细标签组 */
+.full-width-row {
+    display: flex;
+    flex-wrap: wrap;
+    width: 100%; /* 确保父容器宽度为 100% */
+}
+
+/*详情页面-标签tag和input间隔*/
+.el-form-item--label-top .el-form-item__label {
+    height: 12px;
+}
+
+/*详情页面-标签tag和input间隔 - 行内表单*/
+.el-form--inline .el-form-item {
+    /* display: inline-flex; */
+    margin-top: -7px;
+    margin-right: 15px; /* Detail页面input框之间间隔 */
+    margin-left: 0px;
+}
+
+/*详情页面-标签tag和input间隔 - 行内表单 - 标签tag和input间隔*/
+.dynamic-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0px;
+    /* margin: 0px auto; */
+    padding-left: 0px;
+    margin-left: 0px;
+
+    /* border-top: 1px solid #dcdcdc; 
+    padding-top: 20px;  */
+}
+
+/* .dynamic-container-top {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0px;
+    padding-left: 0px;
+    margin-left: 0px;
+    margin-top: 20px;
+} */
+
+.el-divider{
+    padding-top: -10px;
+}
+
+/* input框内内容样式 */
+/* .el-input__wrapper{
+} */
+
+
+.el-crd-cls {
+    width: 100%;
+    margin: 5px auto;
+    padding-bottom: -30px ;
+    border-radius: 10px;
+}
+
+
+.el-dialog {
+/* width: 100%; */
+/* height: 100%; */
+/* max-width: 100%; */
+/* max-height: 100%; */
+margin: auto;
+padding: auto;
+/* margin: auto; */
+/* margin-top: 30px; */
+}
+
+/* 公共Dialog组件样式 */
+.el-dialog__header.show-close{
+    /* background-color: #D6E4EF; */
+    
+    padding-left: 20px;
+    /* padding-top: 10px; */
+    padding-bottom: 10px;
+    font-weight: bold;
+    /* border-radius: 5px 5px 0 0; */
+    margin-bottom: -5px;
+}
+.el-dialog__title{
+    font-size: 24px;
+    color: #0078D7;
+}
+
+
+/* input默认样式.form-inline  */
+.el-input, .el-select, .el-select{
+    /* --el-input-width: 220px; */
+    width: 140px;
+}
+/* input默认样式.form-inline  */
+.width-zoom-1{
+    /* --el-input-width: 220px; */
+    width: 180px;
+}
+
+/* 大文本框 */
+.width-zoom-textarea {
+    width: 570px;
+    height: auto;
+}
+
+.width-zoom-2 {
+    width: 375px;
+}
+.width-zoom-3 {
+    width: 570px;
+}
+.width-zoom-4 {
+    width: 850px;
+}
+.width-zoom-5 {
+    width: 960px;
+}
+.width-history-1 {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0px;
+    /* margin: 0px auto; */
+    padding-left: 0px;
+    margin-left: 0px;
+    width: 1000px;
+}
+.width-history-2 {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0px;
+    padding-left: 0px;
+    margin-left: 0px;
+    width: 1000px;
+    margin-top: 20px;
+}
+
+.width-report-1 {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0px;
+    /* margin: 0px auto; */
+    padding-left: 0px;
+    margin-left: 0px;
+    width: 1200px;
+}
+  /* .form-inline .el-select {
+    --el-select-width: 220px;
+  } 
+  width-zoom-1-5  
+  */
+/* 禁用状态下，改变输入框文字的颜色 */
+  .el-input.is-disabled .el-input__inner {
+    -webkit-text-fill-color: #606266 !important;
+  }
+  .el-textarea.is-disabled .el-textarea__inner{
+    -webkit-text-fill-color: #606266 !important;
+  }
+  .el-select__wrapper.is-disabled .el-select__selected-item{
+    -webkit-text-fill-color: #606266 !important;
+  }
+  .el-checkbox{
+    -webkit-text-fill-color: #606266 !important;
+  }
+  .el-radio__input.is-disabled+span.el-radio__label{
+    -webkit-text-fill-color: #606266 !important;
+  }
+  .search-icon {
+    background-color: white !important;
+    border-color: #c7cbd4 !important;
+  }
+  .search-icon.is-disabled {
+    background-color: #e4e7ed !important;
+    border-color: #c7cbd4 !important;
+  }

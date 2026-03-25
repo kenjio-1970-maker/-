@@ -1,0 +1,99 @@
+/* 定义按钮组件的样式 */
+
+/* 覆盖 primary 按钮样式 */
+.el-button--primary {
+    background-color: #d3f7ff;
+    border-color: #88b8c3;
+    color: #3f3737;
+}
+/* .el-button--primary {
+    background-color: #0C8ACE;
+    border-color: #0C8ACE;
+    color: white;
+} */
+.el-button--danger {
+    background-color: #ffb2b2;
+    border-color: #ed9a9a;
+    color: #372f2f;
+}
+
+/* List列表 按钮组样式 */
+.mb-4 {
+    margin-top: -7px;/* 按钮与card间隔 */
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* 单选框组 多选框组样式 样式 */
+.elx-single-or-choice-group-cls{
+    /* margin: 1px 0px 1px 0px; */
+    border: 1px solid #dcdfe6; 
+    margin-top: 1px;
+    border-radius: 5px 5px 5px 5px;
+    padding: 0px 5px 0px 5px;
+    /* height: 30px; */
+
+}
+/* 单选框标签样式 */
+.el-radio__label{
+    /* padding-top: 10px; */
+    padding-left: 2px;
+    margin-left: 5px;
+    margin-right: 0px;
+    font-weight: normal;
+    margin-right: 00px;
+}
+
+/* 多选框标签样式, 内部字段样式 */
+.el-checkbox__label{
+    /* padding-top: 10px; */
+
+    padding-left: 1px;
+    margin-left: 1px;
+    margin-right: 0px;
+    font-weight: normal;
+}
+
+/* 内部多选框和文字样式 */
+.el-checkbox__inner, .el-checkbox__label{
+    /* margin-top: 3px; */
+    padding-top: 3px;
+}
+ /* .el-checkbox-group{
+    margin: 0px 0px 0px 0px;
+    padding: 0px 0px 0px 0px;
+}  */
+/* 单选/多选 子元素 */
+.elx-single-or-choice-ele{
+    margin: 0px 0px -2px 0px;
+    padding: 0px 5px 0px 5px;
+}
+
+/* el-form-item {
+    margin-left: 10px;
+    margin-right: 30px;
+    padding-left: 30px;
+    padding-right: 30px;
+    flex: 1; 
+}
+
+el-form-item__wrapper {
+    margin: 0px 00px 0px 20px;
+} */
+
+/* 详情页按钮组样式 */
+  .detail-btn-group-cls {
+    margin-top: 10px;
+    width: 100%; /* 设置宽度为100% */
+    display: flex;
+    justify-content: flex-end; /* 保持靠右对齐 */
+  }
+  
+/* 详情页按钮组样式 */
+  .detail-btn-group-cls .el-button {
+    font-size: 16px; /* 增大字体 */
+    /* padding: 12px 24px; 增大内边距 */
+    margin-right: 2px; /* 向左移动按钮 */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* 添加阴影效果 */
+  }

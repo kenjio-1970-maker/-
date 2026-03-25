@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <title>アキコン｜実家じまい相談サービス</title>
+    <!-- meta情報 -->
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- noindex 検索させたくない時だけ入れる-->
+    <meta name="robots" content="noindex, nofollow" />
+    <!-- OGP情報 -->
+    <!-- ページのタイトル -->
+    <meta property="og:title" content="実家じまいのご相談は「アキコン」へ">
+    <!-- ページの説明 -->
+    <meta property="og:description" content="実家じまいサービスが提供する「アキコン」。無料相談、現地調査、相場レポート送付のお申込みはこちらから。">
+    <!-- 電話番号だと認識させない -->
+    <meta name="format-detection" content="telephone=no">
+    <!-- ページのイメージ画像 -->
+    <meta property="og:image" content="https://akiconsys.com/akicon/akicon-ogp.png" />
+    <!-- ファビコン -->
+    <link rel="shortcut icon" href="https://akiconsys.com/akicon/favicon.ico" />
+    <!-- iOSデバイス（iPhone・iPad） で Webサイトをホーム画面に追加したときに表示されるアイコン を指定するタグ -->
+    <link rel="apple-touch-icon" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" href="../android-chrome-192x192.png" />
+    <!-- Googleフォント -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Noto+Sans+JP:wght@100..900&family=Noto+Serif+JP:wght@200..900&display=swap"
+      rel="stylesheet"
+    />
+    <!-- css -->
+    <link href="../css/reset.css" rel="stylesheet" />
+    <link href="../css/form.css" rel="stylesheet" />
+    <script type="module" defer src="../js/checkTokenExists.js"></script>
+    <script type="module" defer src="../js/confirm.js"></script>
+  </head>
+
+  <body class="slide__body">
+      <!-- ヘッダー -->
+      <header class="header form__header">
+        <h1 class="header__logo aki-logo"><img src="../images/aki-logo.png" alt="アキコン" /></h1>
+        <div class="form__title-wrapper">
+          <h2 class="form__title">実家じまい相談フォーム</h2>
+          <p class="form__title-text">&nbsp;</p>
+        </div>
+      </header>
+
+      <main class="main confirm__main">
+        <div class="inner">
+          <section class="form__container">
+            <div class="form__bg">
+              <div class="inner form__inner">
+                <div class="form__box">
+                  <div class="box__bg">
+                    <div class="box__inner">
+                      <h3 class="form__q">ご入力情報確認画面</h3>
+                      <!-- 確認内容 -->
+                      <div class="confirm__box">
+                        <div class="confirm__list">
+                          <dl class="confirm__item">
+                            <dt>現在お住まいのご住所</dt>
+                            <dd id="confirm_addr_1">〒123-4567</dd>
+                            <dd id="confirm_addr_2">東京都**区**</dd>
+                            <dd id="confirm_addr_3">1-1-1</dd>
+                          </dl>
+                          <div class="confirm-info">
+                            <dl class="confirm__item">
+                              <dt>氏名</dt>
+                              <dd id="confirm_name">実家 太郎</dd>
+                            </dl>
+                            <dl class="confirm__item">
+                              <dt>ふりがな</dt>
+                              <dd  id="confirm_kana">ジッカ タロウ</dd>
+                            </dl>
+                            <dl class="confirm__item">
+                              <dt>電話番号</dt>
+                              <dd id="confirm_tel" class="confirm__item-tel">090-1234-5678</dd>
+                            </dl>
+                          </div>
+                          <div class="confirm-info">
+                            <dl class="confirm__item">
+                              <dt>年齢</dt>
+                              <dd id="confirm_age">30代</dd>
+                            </dl>
+                            <dl class="confirm__item">
+                              <dt>性別</dt>
+                              <dd id="confirm_sex">男性</dd>
+                            </dl>
+                            <dl class="confirm__item">
+                              <dt>ご職業</dt>
+                              <dd id="confirm_job" >会社員・役員</dd>
+                            </dl>
+                          </div>
+                          <dl class="confirm__item">
+                            <dt>レポート送付希望手段</dt>
+                            <dd id="confirm_shudan" >メールを希望する（example@sample.com）</dd>
+                          </dl>
+                          <dl class="confirm__item">
+                            <dt>別送付先（任意）</dt>
+                            <dd id="confirm_soufu_atena"></dd>
+                            <dd id="confirm_soufu_mail"></dd>
+                          </dl>
+                        </div>
+                        <p class="confirm__text">上記の内容に相違がなければ、送信ボタンを押してください。</p>
+                        <div class="confirm__button">
+                          <button type="button" class="btn__submit" onclick="handleSubmit()">送信</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </main>
+
+      <footer class="slide__footer form__footer">
+        <a href="../slide00/" class="top__btn" onclick="return showConfirmModal()">トップページ</a>
+        <div>
+          <a href="../form/form13.html" class="back__btn">もどる</a>
+        </div>
+      </footer>
+      <!-- 引入确认模态框 -->
+      <div id="confirmModalContainer"></div>
+
+  </body>
+</html>

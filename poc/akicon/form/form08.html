@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <title>アキコン｜実家じまい相談サービス</title>
+    <!-- meta情報 -->
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- noindex 検索させたくない時だけ入れる-->
+    <meta name="robots" content="noindex, nofollow" />
+    <!-- OGP情報 -->
+    <!-- ページのタイトル -->
+    <meta property="og:title" content="実家じまいのご相談は「アキコン」へ">
+    <!-- ページの説明 -->
+    <meta property="og:description" content="実家じまいサービスが提供する「アキコン」。無料相談、現地調査、相場レポート送付のお申込みはこちらから。">
+    <!-- ページのイメージ画像 -->
+    <meta property="og:image" content="https://akiconsys.com/akicon/akicon-ogp.png" />
+    <!-- ファビコン -->
+    <link rel="shortcut icon" href="https://akiconsys.com/akicon/favicon.ico" />
+    <!-- iOSデバイス（iPhone・iPad） で Webサイトをホーム画面に追加したときに表示されるアイコン を指定するタグ -->
+    <link rel="apple-touch-icon" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" href="../android-chrome-192x192.png" />
+    <!-- Googleフォント -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Noto+Sans+JP:wght@100..900&family=Noto+Serif+JP:wght@200..900&display=swap"
+      rel="stylesheet"
+    />
+    <!-- css -->
+    <link href="../css/reset.css" rel="stylesheet" />
+    <link href="../css/form.css" rel="stylesheet" />
+    <script type="module" defer src="../js/checkTokenExists.js"></script>
+    <script type="module" defer src="../js/form08.js"></script>
+  </head>
+
+  <body class="slide__body">
+
+      <!-- ヘッダー -->
+      <header class="header">
+        <h1 class="header__logo aki-logo"><img src="../images/aki-logo.png" alt="アキコン" /></h1>
+        <div class="form__title-wrapper">
+          <h2 class="form__title">実家じまい相談フォーム</h2>
+              <p class="form__title-text">下記フォームからお客様のご実家に関する情報をご入力ください。</p>
+        </div>
+      </header>
+      <main>
+        <div class="inner">
+        <section class="form__container">
+          <div class="form__bg">
+            <div class="inner form__inner">
+              <div class="form__box">
+                <div class="box__bg">
+                  <div class="box__inner">
+                    <h3 class="form__q">Q8. 維持管理の頻度について教えてください。</h3>
+                    <div class="form05__box">
+                      <label class="radio__inner" hidden=""></label>
+                      <label class="radio__inner form08__checkbox">
+                        <input type="radio" name='Q8' value="1">週に1回以上
+                      </label>
+                      <label class="radio__inner form08__checkbox">
+                        <input type="radio" name='Q8' value="2">2週に1回程度
+                      </label>
+                      <label class="radio__inner form08__checkbox">
+                        <input type="radio" name='Q8' value="3">月に1回程度
+                      </label>
+                      <label class="radio__inner form08__checkbox">
+                        <input type="radio" name='Q8' value="4">6ヶ月に1回程度
+                      </label>
+                      <label class="radio__inner form08__checkbox">
+                        <input type="radio" name='Q8' value="5">年に1回程度
+                      </label>
+                      <label class="radio__inner form08__checkbox">
+                        <input type="radio" name='Q8' value="6">ほとんどしていない
+                      </label>
+                      <label class="radio__inner form08__checkbox">
+                        <input type="radio" name='Q8' value="7">1度もしたことない
+                      </label>
+                      <label class="radio__inner form08__checkbox">
+                        <input type="radio" name='Q8' value="8">わからない
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+        </div>
+      </main>
+      <footer class="slide__footer form__footer">
+        <a href="../slide00/" class="top__btn" onclick="return showConfirmModal()">トップページ</a>
+        <div>
+          <a href="../form/form07.html" class="back__btn">もどる</a>
+          <a href="../form/form09.html" class="next__btn">すすむ</a>
+        </div>
+      </footer>
+
+      <!-- 引入确认模态框 -->
+      <div id="confirmModalContainer"></div>
+
+  </body>
+</html>

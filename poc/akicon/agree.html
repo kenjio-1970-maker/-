@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <title>アキコン｜実家じまい相談サービス</title>
+    <!-- meta情報 -->
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- noindex 検索させたくない時だけ入れる-->
+    <meta name="robots" content="noindex, nofollow" />
+    <!-- OGP情報 -->
+    <!-- ページのタイトル -->
+    <meta property="og:title" content="実家じまいのご相談は「アキコン」へ">
+    <!-- ページの説明 -->
+    <meta property="og:description" content="実家じまいサービスが提供する「アキコン」。無料相談、現地調査、相場レポート送付のお申込みはこちらから。">
+    <!-- ページのイメージ画像 -->
+    <meta property="og:image" content="https://akiconsys.com/akicon/akicon-ogp.png" />
+    <!-- ファビコン -->
+    <link rel="shortcut icon" href="https://akiconsys.com/akicon/akicon/favicon.ico" />
+    <!-- iOSデバイス（iPhone・iPad） で Webサイトをホーム画面に追加したときに表示されるアイコン を指定するタグ -->
+    <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
+    <link rel="icon" type="image/png" href="./android-chrome-192x192.png" />
+    <!-- Googleフォント -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Noto+Sans+JP:wght@100..900&family=Noto+Serif+JP:wght@200..900&display=swap"
+      rel="stylesheet"
+    />
+    <!-- css -->
+    <link href="./css/reset.css" rel="stylesheet" />
+    <link href="./css/agree.css" rel="stylesheet" />
+    <!-- JavaScript -->
+<!--    <script defer src="./js/agree.js"></script>-->
+    <script defer src="./js/agree.js"></script>
+    <script type="module" defer src="../js/checkTokenExists.js"></script>
+    <script type="module" defer src="../js/common.js"></script>
+  </head>
+
+  <body class="slide__body">
+
+      <!-- ヘッダー -->
+      <header class="header">
+        <h1 class="header__logo aki-logo"><img src="./images/aki-logo.png" alt="アキコン" /></h1>
+      </header>
+      <main>
+        <div class="inner">
+        <section class="agree__container">
+          <div class="agree__bg">
+            <div class="inner agree__inner">
+              <h2 class="agree__title">個人情報の取得について</h2>
+              <div class="agree__policy">
+                <p>個別相談へ進むにあたり、下記の記載内容の同意をお願いしております。</p>
+                <p class="agree__policy-text">（利用目的）<br>当社は、収集した個人情報について、以下の目的のために利用いたします。</p>
+                <p class="agree__policy-text"> ①　お客様の実家じまいに関する課題解決をサポートすることを前提として公開情報である不動産登記簿謄本（公開情報）を取得し、照合すること、その他不動産の調査を行うこと<br><span>※入力情報と登記情報が照合できない不動産につきましては、簡易調査は出来かねますので、ご了承ください。</span></p>
+                <p class="agree__policy-text">②　相談・お問い合わせへの回答のため</p>
+                <p class="agree__policy-text">③　近隣相場レポートの送付及びお客様へのコンサルティングのため</p>
+                <p class="agree__policy-text">フォームの入力は約5分程かかります。</p>
+              </div>
+              <form id="agree__form">
+                <label class="agree__checkbox">
+                  <input type="checkbox" id="agreeCheckbox" required>
+                    <span class="agree__checkbox-span">同意する</span>
+                </label>
+                <button type="submit" class="agree__button">同意して相談する</button>
+              </form>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+    <div id="ss_gmo_globalsign_secured_site_seal" oncontextmenu="return false;" style="width:115px; height:57px">
+    <img id="ss_gmo_globalsign_img" src="data:image/gif;base64,R0lGODlhAQABAGAAACH5BAEKAP8ALAAAAAABAAEAAAgEAP8FBAA7" alt="" onclick="ss_open_profile()" style="cursor:pointer; border:0; width:100%" >
+    </div>
+    <script>
+    window.addEventListener('load', () => {
+    let s = document.createElement("script");
+    s.src = "https://seal.atlas.globalsign.com/gss/one/seal?image=seal_115-57_ja.png";
+    document.body.appendChild(s);
+    });
+    </script>
+  </body>
+</html>
