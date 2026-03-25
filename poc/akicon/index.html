@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <title>アキコン｜実家じまい相談サービス</title>
+    <!-- meta情報 -->
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- noindex 検索させたくない時だけ入れる-->
+    <meta name="robots" content="noindex, nofollow" />
+    <!-- OGP情報 -->
+    <!-- ページのタイトル -->
+    <meta property="og:title" content="実家じまいのご相談は「アキコン」へ" />
+    <!-- ページの説明 -->
+    <meta property="og:description" content="実家じまいサービスが提供する「アキコン」。無料相談、現地調査、相場レポート送付のお申込みはこちらから。" />
+    <!-- ページのイメージ画像 -->
+    <meta property="og:image" content="https://akiconsys.com/akicon/akicon-ogp.png" />
+    <!-- ファビコン -->
+    <link rel="shortcut icon" href="https://akiconsys.com/akicon/favicon.ico" />
+    <!-- iOSデバイス（iPhone・iPad） で Webサイトをホーム画面に追加したときに表示されるアイコン を指定するタグ -->
+    <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
+    <link rel="icon" type="image/png" href="./android-chrome-192x192.png" />
+    <!-- Googleフォント -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Noto+Sans+JP:wght@100..900&family=Noto+Serif+JP:wght@200..900&display=swap"
+      rel="stylesheet"
+    />
+    <!-- css -->
+    <link href="./css/reset.css" rel="stylesheet" />
+    <link href="./css/style.css" rel="stylesheet" />
+    <!-- JavaScript -->
+    <script defer src="./js/script.js"></script>
+    <script type="module" src="./js/common.js"></script>
+    <script type="module" src="./js/login.js"></script>
+  </head>
+
+  <body class="login__body">
+    <div class="inner">
+      <!-- ヘッダー -->
+      <header class="header login__header">
+        <h1 class="login__logo"><img src="./images/aki-logo.png" alt="アキコン" /></h1>
+      </header>
+      <main>
+        <div class="login__container">
+          <div class="login__bg">
+            <div class="inner">
+              <h2 class="login__title">ログイン</h2>
+              <form class="login__form" action="login.php" method="POST">
+                <div class="login__form-group">
+                  <label class="login__form-label" for="username">ID</label>
+                  <input class="login__form-input" type="text" id="username" name="username" placeholder="入力してください" required />
+                </div>
+                <div class="login__form-group">
+                  <label class="login__form-label label02" for="password">パスワード</label>
+                  <input class="login__form-input" type="password" id="password" name="password" placeholder="入力してください" required />
+                </div>
+                <button type="button" class="login__btn">ログイン</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,1902 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>実家じまい 管理システム【POC】</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>">
+<style>
+:root {
+  --primary: #3b82f6;
+  --primary-dark: #2563eb;
+  --primary-light: #eff6ff;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --info: #6366f1;
+  --gray-50: #f9fafb;
+  --gray-100: #f3f4f6;
+  --gray-200: #e5e7eb;
+  --gray-300: #d1d5db;
+  --gray-400: #9ca3af;
+  --gray-500: #6b7280;
+  --gray-600: #4b5563;
+  --gray-700: #374151;
+  --gray-800: #1f2937;
+  --gray-900: #111827;
+  --sidebar-w: 220px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Hiragino Kaku Gothic ProN','Meiryo',sans-serif; background: var(--gray-50); color: var(--gray-800); height: 100vh; overflow: hidden; }
+/* ===== LAYOUT ===== */
+#app { display: flex; height: 100vh; }
+#sidebar { width: var(--sidebar-w); background: var(--gray-800); color: #fff; display: flex; flex-direction: column; flex-shrink: 0; }
+#sidebar-logo { padding: 16px; border-bottom: 1px solid var(--gray-700); }
+#sidebar-logo h1 { font-size: 14px; font-weight: 700; line-height: 1.3; }
+#sidebar-logo p { font-size: 11px; color: var(--gray-400); margin-top: 2px; }
+#sidebar-nav { flex: 1; overflow-y: auto; padding: 8px 0; }
+.nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 16px; cursor: pointer; font-size: 13px; transition: background 0.15s; border-left: 3px solid transparent; }
+.nav-item:hover { background: var(--gray-700); }
+.nav-item.active { background: var(--gray-700); border-left-color: var(--primary); color: #fff; }
+.nav-item .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+#sidebar-footer { padding: 12px 16px; border-top: 1px solid var(--gray-700); }
+#sidebar-footer .user-info { font-size: 12px; color: var(--gray-300); }
+#sidebar-footer .user-role { font-size: 11px; color: var(--gray-400); }
+#logout-btn { margin-top: 8px; width: 100%; padding: 6px; background: var(--gray-700); color: var(--gray-300); border: none; border-radius: 4px; cursor: pointer; font-size: 12px; }
+#logout-btn:hover { background: var(--gray-600); }
+#main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+#topbar { background: #fff; border-bottom: 1px solid var(--gray-200); padding: 0 20px; height: 52px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+#topbar-title { font-size: 15px; font-weight: 600; color: var(--gray-700); }
+#topbar-right { display: flex; align-items: center; gap: 12px; font-size: 13px; color: var(--gray-500); }
+#content { flex: 1; overflow-y: auto; padding: 20px; }
+/* ===== LOGIN ===== */
+#login-page { display: flex; align-items: center; justify-content: center; min-height: 100vh; background: linear-gradient(135deg, var(--gray-800) 0%, var(--gray-700) 100%); }
+.login-card { background: #fff; border-radius: 12px; padding: 40px; width: 380px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+.login-card h1 { text-align: center; font-size: 22px; font-weight: 700; margin-bottom: 8px; color: var(--gray-800); }
+.login-card p { text-align: center; color: var(--gray-500); font-size: 13px; margin-bottom: 28px; }
+/* ===== CARDS ===== */
+.card { background: #fff; border-radius: 8px; border: 1px solid var(--gray-200); margin-bottom: 16px; }
+.card-header { padding: 12px 16px; border-bottom: 1px solid var(--gray-200); font-size: 14px; font-weight: 600; color: var(--gray-700); display: flex; align-items: center; justify-content: space-between; }
+.card-body { padding: 16px; }
+/* ===== FORM ===== */
+.form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px 16px; }
+.form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 16px; }
+.form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px 16px; }
+.form-grid-full { grid-column: 1 / -1; }
+.form-group { display: flex; flex-direction: column; gap: 4px; }
+.form-label { font-size: 12px; font-weight: 600; color: var(--gray-600); }
+.form-label.required::after { content: ' *'; color: var(--danger); }
+.form-control { padding: 7px 10px; border: 1px solid var(--gray-300); border-radius: 6px; font-size: 13px; outline: none; transition: border-color 0.15s; background: #fff; }
+.form-control:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+.form-control:disabled { background: var(--gray-100); color: var(--gray-500); cursor: not-allowed; }
+select.form-control { cursor: pointer; }
+textarea.form-control { resize: vertical; min-height: 80px; }
+/* ===== TABLE ===== */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { background: var(--gray-50); padding: 8px 12px; text-align: left; font-weight: 600; color: var(--gray-600); border-bottom: 2px solid var(--gray-200); white-space: nowrap; }
+td { padding: 8px 12px; border-bottom: 1px solid var(--gray-100); color: var(--gray-700); }
+tr:hover td { background: var(--primary-light); }
+tr.selected td { background: #dbeafe; }
+/* ===== BADGE ===== */
+.badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+.badge-01 { background: #fef3c7; color: #92400e; }
+.badge-02 { background: #dbeafe; color: #1e40af; }
+.badge-03 { background: #d1fae5; color: #065f46; }
+.badge-04 { background: #f3e8ff; color: #6b21a8; }
+.badge-S { background: #fee2e2; color: #991b1b; }
+.badge-A { background: #fff7ed; color: #9a3412; }
+.badge-B { background: #fffbeb; color: #92400e; }
+.badge-C { background: var(--gray-100); color: var(--gray-600); }
+.badge-success { background: #d1fae5; color: #065f46; }
+.badge-warn { background: #fef3c7; color: #92400e; }
+.badge-info { background: #dbeafe; color: #1e40af; }
+/* ===== BUTTONS ===== */
+.btn { display: inline-flex; align-items: center; gap: 4px; padding: 7px 14px; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; border: 1px solid transparent; transition: all 0.15s; }
+.btn-primary { background: var(--primary); color: #fff; border-color: var(--primary); }
+.btn-primary:hover { background: var(--primary-dark); }
+.btn-secondary { background: #fff; color: var(--gray-700); border-color: var(--gray-300); }
+.btn-secondary:hover { background: var(--gray-50); }
+.btn-success { background: var(--success); color: #fff; }
+.btn-success:hover { background: #059669; }
+.btn-danger { background: var(--danger); color: #fff; }
+.btn-danger:hover { background: #dc2626; }
+.btn-warning { background: var(--warning); color: #fff; }
+.btn-warning:hover { background: #d97706; }
+.btn-sm { padding: 4px 10px; font-size: 12px; }
+.btn-xs { padding: 2px 8px; font-size: 11px; }
+.btn-icon { padding: 6px 8px; }
+/* ===== SEARCH BAR ===== */
+.search-bar { display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-end; padding: 12px 16px; background: var(--gray-50); border-bottom: 1px solid var(--gray-200); border-radius: 8px 8px 0 0; }
+.search-bar .form-group { min-width: 150px; }
+/* ===== PAGINATION ===== */
+.pagination { display: flex; align-items: center; gap: 4px; padding: 12px 16px; border-top: 1px solid var(--gray-200); justify-content: flex-end; background: var(--gray-50); }
+.page-btn { padding: 5px 10px; border: 1px solid var(--gray-300); border-radius: 4px; cursor: pointer; font-size: 12px; background: #fff; }
+.page-btn:hover { background: var(--gray-100); }
+.page-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+.page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.page-info { font-size: 12px; color: var(--gray-500); }
+/* ===== MODAL ===== */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 16px; }
+.modal { background: #fff; border-radius: 10px; max-width: 900px; width: 100%; max-height: 90vh; display: flex; flex-direction: column; box-shadow: 0 25px 60px rgba(0,0,0,0.3); }
+.modal-lg { max-width: 1100px; }
+.modal-sm { max-width: 500px; }
+.modal-header { padding: 16px 20px; border-bottom: 1px solid var(--gray-200); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+.modal-header h2 { font-size: 16px; font-weight: 600; }
+.modal-close { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--gray-500); line-height: 1; padding: 2px; }
+.modal-close:hover { color: var(--gray-800); }
+.modal-body { padding: 20px; overflow-y: auto; flex: 1; }
+.modal-footer { padding: 12px 20px; border-top: 1px solid var(--gray-200); display: flex; justify-content: flex-end; gap: 8px; flex-shrink: 0; }
+/* ===== INLINE TABLE ===== */
+.inline-table { width: 100%; font-size: 12px; }
+.inline-table th { font-size: 11px; }
+.inline-table td input, .inline-table td select { padding: 3px 6px; font-size: 12px; border: 1px solid var(--gray-300); border-radius: 4px; width: 100%; }
+.inline-table td { padding: 4px 8px; }
+/* ===== TOAST ===== */
+#toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
+.toast { padding: 12px 16px; border-radius: 8px; color: #fff; font-size: 13px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 8px; min-width: 280px; animation: slideIn 0.3s ease; }
+.toast-success { background: var(--success); }
+.toast-error { background: var(--danger); }
+.toast-info { background: var(--info); }
+@keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+/* ===== DIVIDER ===== */
+.divider { height: 1px; background: var(--gray-200); margin: 12px 0; }
+/* ===== CONFIRM ===== */
+.confirm-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 2000; display: flex; align-items: center; justify-content: center; }
+.confirm-box { background: #fff; border-radius: 10px; padding: 28px 32px; max-width: 400px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
+.confirm-box h3 { font-size: 16px; margin-bottom: 12px; }
+.confirm-box p { color: var(--gray-600); font-size: 13px; margin-bottom: 20px; }
+/* ===== STATUS COLORS ===== */
+.status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 4px; }
+.dot-01 { background: var(--warning); }
+.dot-02 { background: var(--primary); }
+.dot-03 { background: var(--success); }
+.dot-04 { background: var(--gray-400); }
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) { #sidebar { display: none; } .form-grid-3 { grid-template-columns: 1fr 1fr; } }
+/* ===== UTILS ===== */
+.hidden { display: none !important; }
+.text-sm { font-size: 12px; }
+.text-muted { color: var(--gray-500); }
+.mb-2 { margin-bottom: 8px; }
+.mb-3 { margin-bottom: 12px; }
+.mt-3 { margin-top: 12px; }
+.flex { display: flex; }
+.items-center { align-items: center; }
+.gap-2 { gap: 8px; }
+.gap-3 { gap: 12px; }
+.justify-between { justify-content: space-between; }
+.w-full { width: 100%; }
+.loading { opacity: 0.6; pointer-events: none; }
+.spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.4); border-top-color: #fff; border-radius: 50%; animation: spin 0.6s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.section-title { font-size: 13px; font-weight: 700; color: var(--gray-600); padding: 8px 0 4px; border-bottom: 2px solid var(--primary-light); margin-bottom: 12px; }
+/* ===== HISTORY TABLE ===== */
+.hist-table { width: 100%; font-size: 12px; }
+.hist-table th { padding: 6px 8px; font-size: 11px; }
+.hist-table td { padding: 4px 8px; }
+.hist-table td input[type=date] { padding: 3px 6px; border: 1px solid var(--gray-300); border-radius: 4px; font-size: 12px; }
+.hist-table td textarea { width: 100%; padding: 3px 6px; border: 1px solid var(--gray-300); border-radius: 4px; font-size: 12px; resize: none; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN PAGE -->
+<div id="login-page">
+  <div class="login-card">
+    <h1>🏠 実家じまい</h1>
+    <p>管理システム【POC】</p>
+    <div class="form-group mb-3">
+      <label class="form-label required">メールアドレス</label>
+      <input id="login-email" type="email" class="form-control" value="admin@rics.co.jp" placeholder="admin@rics.co.jp">
+    </div>
+    <div class="form-group mb-3">
+      <label class="form-label required">パスワード</label>
+      <input id="login-pass" type="password" class="form-control" value="password123">
+    </div>
+    <div id="login-error" class="hidden" style="color:var(--danger);font-size:12px;margin-bottom:10px;"></div>
+    <button id="login-btn" class="btn btn-primary w-full" onclick="doLogin()">ログイン</button>
+    <p style="font-size:11px;color:var(--gray-400);margin-top:12px;text-align:center;">admin@rics.co.jp / password123</p>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app" class="hidden">
+  <!-- SIDEBAR -->
+  <nav id="sidebar">
+    <div id="sidebar-logo">
+      <h1>🏠 実家じまい</h1>
+      <p>管理システム【POC】</p>
+    </div>
+    <div id="sidebar-nav">
+      <div class="nav-item active" onclick="navigate('inquiry')" data-page="inquiry">
+        <span class="nav-icon">📋</span><span>問い合わせ管理</span>
+      </div>
+      <div class="nav-item" onclick="navigate('biz')" data-page="biz">
+        <span class="nav-icon">🤝</span><span>協力業者管理</span>
+      </div>
+      <div class="nav-item" onclick="navigate('pot')" data-page="pot">
+        <span class="nav-icon">👤</span><span>見込み顧客管理</span>
+      </div>
+      <div class="nav-item" onclick="navigate('pro')" data-page="pro">
+        <span class="nav-icon">🔨</span><span>施工業者管理</span>
+      </div>
+      <div class="nav-item" onclick="navigate('user')" data-page="user">
+        <span class="nav-icon">👥</span><span>ユーザー管理</span>
+      </div>
+      <div class="nav-item" onclick="navigate('role')" data-page="role">
+        <span class="nav-icon">🔑</span><span>ロール管理</span>
+      </div>
+    </div>
+    <div id="sidebar-footer">
+      <div class="user-info" id="user-name-disp">---</div>
+      <div class="user-role" id="user-role-disp">---</div>
+      <button id="logout-btn" onclick="doLogout()">ログアウト</button>
+    </div>
+  </nav>
+  <div id="main">
+    <div id="topbar">
+      <span id="topbar-title">問い合わせ管理</span>
+      <div id="topbar-right">
+        <span id="topbar-date"></span>
+      </div>
+    </div>
+    <div id="content"><!-- dynamic --></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast-container"></div>
+
+<!-- CONFIRM -->
+<div id="confirm-overlay" class="confirm-overlay hidden">
+  <div class="confirm-box">
+    <h3 id="confirm-title">確認</h3>
+    <p id="confirm-msg">実行してもよろしいですか？</p>
+    <div style="display:flex;gap:8px;justify-content:center">
+      <button class="btn btn-secondary" onclick="confirmResolve(false)">キャンセル</button>
+      <button class="btn btn-danger" onclick="confirmResolve(true)">実行</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+//  CONFIG & STATE
+// ============================================================
+// APIベースURLを動的に決定（同じホスト上の8080ポート or ローカル）
+function detectApiBase() {
+  const host = location.hostname;
+  const proto = location.protocol;
+  if (host === 'localhost' || host === '127.0.0.1') {
+    return 'http://localhost:8080/jikajimai';
+  }
+  // Sandboxや本番環境: ホスト名の3000→8080に置換
+  const apiHost = host.replace(/^3000-/, '8080-').replace(/:3000$/, ':8080');
+  return `${proto}//${apiHost}/jikajimai`;
+}
+const API_BASE = detectApiBase();
+let token = '';
+let dictMap = {};
+let currentPage = 'inquiry';
+let confirmCb = null;
+
+// ============================================================
+//  UTILS
+// ============================================================
+const $ = id => document.getElementById(id);
+const $q = (sel, root=document) => root.querySelector(sel);
+const $qa = (sel, root=document) => [...root.querySelectorAll(sel)];
+
+function toast(msg, type='success') {
+  const el = document.createElement('div');
+  el.className = `toast toast-${type}`;
+  el.innerHTML = `<span>${type==='success'?'✓':type==='error'?'✗':'ℹ'}</span><span>${msg}</span>`;
+  $('toast-container').appendChild(el);
+  setTimeout(() => el.remove(), 3500);
+}
+
+async function confirm(title, msg) {
+  $('confirm-title').textContent = title;
+  $('confirm-msg').textContent = msg;
+  $('confirm-overlay').classList.remove('hidden');
+  return new Promise(r => { confirmCb = r; });
+}
+function confirmResolve(v) {
+  $('confirm-overlay').classList.add('hidden');
+  if (confirmCb) { confirmCb(v); confirmCb = null; }
+}
+
+async function api(path, opts={}) {
+  const headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
+  const res = await fetch(API_BASE + path, { headers, ...opts,
+    headers: { ...headers, ...(opts.headers||{}) } });
+  const newTok = res.headers.get('X-Refreshed-Token');
+  if (newTok) { token = newTok; localStorage.setItem('token', token); }
+  if (res.status === 401) { doLogout(); throw new Error('Unauthorized'); }
+  return res.json();
+}
+
+function dictLabel(key, val) {
+  if (!val) return val || '';
+  const list = dictMap[key] || [];
+  const item = list.find(d => d.value == val);
+  return item ? item.label : val;
+}
+function selectOpts(key, addBlank=true) {
+  const list = dictMap[key] || [];
+  const blank = addBlank ? '<option value="">--選択--</option>' : '';
+  return blank + list.map(d => `<option value="${d.value}">${d.label}</option>`).join('');
+}
+function fmtDate(s) { if (!s) return ''; return String(s).slice(0,10); }
+function fmtDateTime(s) { if (!s) return ''; return String(s).slice(0,16).replace('T',' '); }
+function escHtml(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function setSelectVal(sel, val) { if (!sel) return; sel.value = val; }
+
+// ============================================================
+//  LOGIN / LOGOUT
+// ============================================================
+async function doLogin() {
+  const email = $('login-email').value.trim();
+  const pass = $('login-pass').value.trim();
+  if (!email || !pass) { $('login-error').textContent='入力してください'; $('login-error').classList.remove('hidden'); return; }
+  const btn = $('login-btn');
+  btn.innerHTML='<span class="spinner"></span> ログイン中...'; btn.disabled=true;
+  try {
+    const r = await fetch(API_BASE+'/auth/login', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({email, password: pass})
+    });
+    const data = await r.json();
+    if (!data.success) throw new Error(data.message||'ログイン失敗');
+    token = data.data.token;
+    localStorage.setItem('token', token);
+    const info = data.data.userInfo;
+    $('user-name-disp').textContent = info.name;
+    $('user-role-disp').textContent = info.role;
+    $('login-page').style.display = 'none';
+    $('app').classList.remove('hidden');
+    const now = new Date();
+    $('topbar-date').textContent = now.toLocaleDateString('ja-JP', {year:'numeric',month:'long',day:'numeric'});
+    await loadDicts();
+    navigate('inquiry');
+  } catch(e) {
+    $('login-error').textContent = e.message;
+    $('login-error').classList.remove('hidden');
+  } finally {
+    btn.innerHTML='ログイン'; btn.disabled=false;
+  }
+}
+function doLogout() {
+  token = ''; localStorage.removeItem('token');
+  $('app').classList.add('hidden');
+  $('login-page').style.display = 'flex';
+}
+async function loadDicts() {
+  try {
+    const r = await api('/sys/code/mapping/all');
+    if (r.success) dictMap = r.data;
+  } catch(e) {}
+}
+
+// ============================================================
+//  NAVIGATION
+// ============================================================
+function navigate(page) {
+  currentPage = page;
+  $qa('.nav-item').forEach(el => el.classList.remove('active'));
+  const nav = $q(`[data-page="${page}"]`);
+  if (nav) nav.classList.add('active');
+  const titles = { inquiry:'問い合わせ管理', biz:'協力業者管理', pot:'見込み顧客管理', pro:'施工業者管理', user:'ユーザー管理', role:'ロール管理' };
+  $('topbar-title').textContent = titles[page] || '';
+  const pages = { inquiry: renderInquiry, biz: renderBiz, pot: renderPot, pro: renderPro, user: renderUser, role: renderRole };
+  if (pages[page]) pages[page]();
+}
+
+// ============================================================
+//  GENERIC LIST HELPERS
+// ============================================================
+function renderPagination(container, current, pages, total, size, onPage) {
+  const start = (current-1)*size+1;
+  const end = Math.min(current*size, total);
+  let html = `<div class="pagination">
+    <span class="page-info">全 ${total} 件 (${start}–${end})</span>
+    <button class="page-btn" onclick="${onPage}(${current-1})" ${current<=1?'disabled':''}>‹</button>`;
+  const from = Math.max(1, current-2), to = Math.min(pages, current+2);
+  for (let p=from; p<=to; p++) html += `<button class="page-btn ${p===current?'active':''}" onclick="${onPage}(${p})">${p}</button>`;
+  html += `<button class="page-btn" onclick="${onPage}(${current+1})" ${current>=pages?'disabled':''}>›</button></div>`;
+  container.insertAdjacentHTML('beforeend', html);
+}
+
+// ============================================================
+//  1. 問い合わせ管理
+// ============================================================
+let iqState = { current:1, size:10, total:0, pages:1, search:{}, rows:[] };
+let iqEditRow = null;
+
+function renderInquiry() {
+  $('content').innerHTML = `
+  <div class="card">
+    <div class="search-bar">
+      <div class="form-group">
+        <label class="form-label">氏名</label>
+        <input id="iq-s-name" class="form-control" placeholder="氏名で検索">
+      </div>
+      <div class="form-group">
+        <label class="form-label">流入経路</label>
+        <select id="iq-s-source" class="form-control">${selectOpts('SCM_INQUIRY_RESP_STATUS',true)}</select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">対応状況</label>
+        <select id="iq-s-status" class="form-control">${selectOpts('SCM_INQUIRY_RESP_STATUS',true)}</select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">受付日（開始）</label>
+        <input id="iq-s-from" type="date" class="form-control">
+      </div>
+      <div class="form-group">
+        <label class="form-label">受付日（終了）</label>
+        <input id="iq-s-to" type="date" class="form-control">
+      </div>
+      <div style="display:flex;align-items:flex-end;gap:8px">
+        <button class="btn btn-primary" onclick="iqSearch()">🔍 検索</button>
+        <button class="btn btn-secondary" onclick="iqClear()">リセット</button>
+        <button class="btn btn-success" onclick="iqAdd()">＋ 新規問い合わせ</button>
+      </div>
+    </div>
+    <div id="iq-table-wrap"></div>
+  </div>
+  <div id="iq-modal"></div>`;
+  iqLoad(1);
+}
+
+async function iqLoad(page) {
+  iqState.current = page;
+  const r = await api('/apl/inquiry_mgnt/page', {
+    method:'POST', body: JSON.stringify({current:page, size:iqState.size, data: iqState.search})
+  });
+  if (!r.success) { toast('取得失敗','error'); return; }
+  iqState.total = r.data.total;
+  iqState.pages = r.data.pages;
+  iqState.rows = r.data.records;
+  renderIqTable();
+}
+function iqSearch() {
+  iqState.search = {
+    customerName: $('iq-s-name').value,
+    aplSource: $('iq-s-source').value,
+    handlingStatus: $('iq-s-status') ? $('iq-s-status').value : '',
+    dateFrom: $('iq-s-from').value ? $('iq-s-from').value+' 00:00:00':'',
+    dateTo: $('iq-s-to').value ? $('iq-s-to').value+' 23:59:59':'',
+  };
+  iqLoad(1);
+}
+function iqClear() {
+  $('iq-s-name').value='';
+  if ($('iq-s-source')) $('iq-s-source').value='';
+  if ($('iq-s-status')) $('iq-s-status').value='';
+  $('iq-s-from').value=''; $('iq-s-to').value='';
+  iqState.search = {}; iqLoad(1);
+}
+
+const IQ_STATUS_LABEL = { '01':'未対応','02':'対応中','03':'対応済み','04':'保留' };
+const IQ_STATUS_CLS   = { '01':'badge-01','02':'badge-02','03':'badge-03','04':'badge-04' };
+const IQ_SOURCE_LABEL = { AKICON:'アキコン',TEL:'電話',SHOKAI:'紹介',EVENT:'イベント',SNS:'SNS',OTHER:'その他' };
+
+function renderIqTable() {
+  const wrap = $('iq-table-wrap');
+  if (!wrap) return;
+  let html = `<div class="card-body" style="padding:8px 0 0">
+    <div style="padding:8px 16px;display:flex;justify-content:flex-end;"></div>
+  </div>
+  <div class="table-wrap">
+  <table>
+    <thead><tr>
+      <th>問合せID</th><th>受付日</th><th>対応状況</th><th>流入経路</th>
+      <th>氏名</th><th>フリガナ</th><th>電話番号</th><th>ランク</th><th>レポートSts</th><th>操作</th>
+    </tr></thead><tbody>`;
+  iqState.rows.forEach((rec, i) => {
+    const m = rec.aplInquiryMgnt;
+    const src = rec.aplInquirySource;
+    const sts = m.handlingStatus;
+    const rank = m.aplRank || 'C';
+    const rSts = m.reportSts;
+    html += `<tr ondblclick="iqView(${i})">
+      <td><span style="font-family:monospace;font-size:11px">${escHtml(m.id)}</span></td>
+      <td>${fmtDate(m.handlingDate)}</td>
+      <td><span class="badge ${IQ_STATUS_CLS[sts]||'badge-01'}">${IQ_STATUS_LABEL[sts]||sts||'--'}</span></td>
+      <td>${escHtml(src.source || IQ_SOURCE_LABEL[m.aplSource] || m.aplSource || '')}</td>
+      <td><strong>${escHtml(m.customerName)}</strong></td>
+      <td>${escHtml(m.nameFurigana||'')}</td>
+      <td>${escHtml(m.phoneNumber||'')}</td>
+      <td><span class="badge badge-${rank}">${rank}ランク</span></td>
+      <td><span class="badge ${rSts==='01'?'badge-success':'badge-warn'}">${rSts==='01'?'送付済':'未送付'}</span></td>
+      <td>
+        <button class="btn btn-secondary btn-xs" onclick="iqView(${i})">詳細</button>
+        <button class="btn btn-primary btn-xs" onclick="iqEdit(${i})">編集</button>
+        <button class="btn btn-danger btn-xs" onclick="iqDel(${i})">削除</button>
+      </td>
+    </tr>`;
+  });
+  html += '</tbody></table></div>';
+  wrap.innerHTML = html;
+  renderPagination(wrap, iqState.current, iqState.pages, iqState.total, iqState.size, 'iqLoad');
+}
+
+async function iqView(i) { await iqOpenModal(i, true); }
+async function iqEdit(i) { await iqOpenModal(i, false); }
+function iqAdd() {
+  iqEditRow = {
+    aplInquiryMgnt: { id:'', handlingStatus:'01', aplSource:'', aplRank:'C', reportSts:'00' },
+    aplInquiryMaster: {},
+    aplInquiryMasterList: [],
+    bizProgressHistoryList: [],
+    aplReportSendList: []
+  };
+  renderIqModal(false, true);
+}
+
+async function iqOpenModal(i, readOnly) {
+  const rec = iqState.rows[i];
+  const inquiryId = rec.aplInquiryMgnt.id;
+  const r = await api(`/apl/inquiry_mgnt/${inquiryId}`);
+  if (!r.success) { toast('取得失敗','error'); return; }
+  iqEditRow = r.data;
+  renderIqModal(readOnly);
+}
+
+function renderIqModal(readOnly, isNew=false) {
+  const d = iqEditRow.aplInquiryMgnt;
+  const master = iqEditRow.aplInquiryMaster || {};
+  const histList = iqEditRow.bizProgressHistoryList || [];
+  const masterList = iqEditRow.aplInquiryMasterList || [];
+  const reportList = iqEditRow.aplReportSendList || [];
+  const dis = readOnly ? 'disabled' : '';
+  const title = isNew ? '問い合わせ新規登録' : readOnly ? '問い合わせ詳細' : '問い合わせ編集';
+
+  // 対応履歴テーブル
+  let histRows = histList.length ? histList.map((h,i)=>`
+    <tr>
+      <td><input type="date" class="form-control" id="hist-date-${i}" value="${fmtDate(h.actionDate)}" ${dis}></td>
+      <td><textarea class="form-control" id="hist-cont-${i}" rows="2" ${dis}>${escHtml(h.actionContent||'')}</textarea></td>
+      ${!readOnly?`<td><button class="btn btn-danger btn-xs" onclick="iqHistDel(${i})">削除</button></td>`:''}
+    </tr>`).join('') : `<tr><td colspan="${readOnly?2:3}" style="text-align:center;color:var(--gray-400);padding:12px">履歴なし</td></tr>`;
+
+  // アンケート（問い合わせ管理マスタ）
+  const qaKeys = ['Q1','Q2','Q3','Q5','Q6','Q10','Q11(4)-1','Q11(4)-2','Q11(4)-3','Q12(1)','Q12(3)','Q13(1)-1'];
+  const qaLabels = {'Q1':'Q1:相談内容','Q2':'Q2:現在地','Q3':'Q3:物件種別','Q5':'Q5:空き家期間','Q6':'Q6:緊急度',
+    'Q10':'Q10:相談経緯','Q11(4)-1':'Q11:郵便番号','Q11(4)-2':'Q11:住所','Q11(4)-3':'Q11:番地',
+    'Q12(1)':'Q12:氏名','Q12(3)':'Q12:電話番号','Q13(1)-1':'Q13:送付方法'};
+  let qaHtml = '<table class="inline-table" style="width:100%"><tr>';
+  qaKeys.forEach((k,i) => {
+    if (i%2===0 && i>0) qaHtml += '</tr><tr>';
+    qaHtml += `<th style="width:120px">${escHtml(qaLabels[k]||k)}</th><td>${escHtml(master[k]||'')}</td>`;
+  });
+  qaHtml += '</tr></table>';
+
+  // レポート送付情報
+  let rptRows = reportList.length ? reportList.map((rp,i)=>`
+    <tr>
+      <td>${escHtml(dictLabel('REPORT_SEND_MOD', rp.deliveryMod)||rp.deliveryMod||'')}</td>
+      <td><span class="badge ${rp.sendSts==='01'?'badge-success':'badge-warn'}">${rp.sendSts==='01'?'送付済':'未送付'}</span></td>
+      <td>${fmtDate(rp.sentDate)}</td>
+      <td>${escHtml(rp.fileName||'--')}</td>
+      <td>${escHtml(rp.remark||'')}</td>
+    </tr>`).join('') : '<tr><td colspan="5" style="text-align:center;color:var(--gray-400);padding:8px">レポートなし</td></tr>';
+
+  const modal = $('iq-modal');
+  modal.innerHTML = `<div class="modal-overlay" onclick="if(event.target===this)iqCloseModal()">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <h2>${title}</h2>
+      <button class="modal-close" onclick="iqCloseModal()">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- 受付情報 -->
+      <div class="section-title">📋 受付情報／アキコン設置店舗詳細</div>
+      <div class="form-grid mb-3">
+        <div class="form-group">
+          <label class="form-label">案件流入経路</label>
+          <select id="eq-aplSource" class="form-control" ${dis}>
+            <option value="">--選択--</option>
+            <option value="AKICON" ${d.aplSource==='AKICON'?'selected':''}>アキコン（Web）</option>
+            <option value="TEL" ${d.aplSource==='TEL'?'selected':''}>電話</option>
+            <option value="SHOKAI" ${d.aplSource==='SHOKAI'?'selected':''}>紹介</option>
+            <option value="EVENT" ${d.aplSource==='EVENT'?'selected':''}>イベント</option>
+            <option value="SNS" ${d.aplSource==='SNS'?'selected':''}>SNS</option>
+            <option value="OTHER" ${d.aplSource==='OTHER'?'selected':''}>その他</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">問合せID</label>
+          <input class="form-control" value="${escHtml(d.id)}" disabled>
+        </div>
+        <div class="form-group">
+          <label class="form-label">ランク</label>
+          <input class="form-control" value="${escHtml(d.aplRank||'C')}" disabled>
+        </div>
+        <div class="form-group">
+          <label class="form-label">受付日</label>
+          <input id="eq-handlingDate" type="datetime-local" class="form-control" value="${(d.handlingDate||'').slice(0,16).replace(' ','T')}" ${dis}>
+        </div>
+        <div class="form-group">
+          <label class="form-label">対応状況</label>
+          <select id="eq-handlingStatus" class="form-control" ${dis}>
+            ${selectOpts('SCM_INQUIRY_RESP_STATUS')}
+          </select>
+        </div>
+      </div>
+
+      <!-- 相場レポート送付先 -->
+      <div class="section-title">📮 相場レポート送付先</div>
+      <div class="form-grid mb-3">
+        <div class="form-group">
+          <label class="form-label required">氏名</label>
+          <input id="eq-customerName" class="form-control" value="${escHtml(d.customerName||'')}" ${dis} maxlength="100">
+        </div>
+        <div class="form-group">
+          <label class="form-label required">ひらがな</label>
+          <input id="eq-nameFurigana" class="form-control" value="${escHtml(d.nameFurigana||'')}" ${dis} maxlength="100">
+        </div>
+        <div class="form-group">
+          <label class="form-label">電話番号</label>
+          <input id="eq-phoneNumber" class="form-control" value="${escHtml(d.phoneNumber||'')}" ${dis} maxlength="20">
+        </div>
+        <div class="form-group">
+          <label class="form-label">メールアドレス（相場レポート送付先）</label>
+          <input id="eq-contactEmail" type="email" class="form-control" value="${escHtml(d.contactEmail||'')}" ${dis} maxlength="320">
+        </div>
+        <div class="form-group form-grid-full">
+          <label class="form-label">相場レポート郵送先</label>
+          <input id="eq-mailingAddress" class="form-control" value="${escHtml(d.mailingAddress||'')}" ${dis} maxlength="255">
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div class="text-sm text-muted mb-2">※相談者以外の相場レポート送付先</div>
+      <div class="form-grid mb-3">
+        <div class="form-group">
+          <label class="form-label">宛名</label>
+          <input id="eq-reportRecipientName" class="form-control" value="${escHtml(d.reportRecipientName||'')}" ${dis} maxlength="100">
+        </div>
+        <div class="form-group">
+          <label class="form-label">送付先メール</label>
+          <input id="eq-reportRecipientEmail" type="email" class="form-control" value="${escHtml(d.reportRecipientEmail||'')}" ${dis} maxlength="255">
+        </div>
+      </div>
+
+      <!-- レポート送付情報 -->
+      <div class="section-title">📄 レポート送付情報</div>
+      <div class="table-wrap mb-3">
+        <table class="inline-table">
+          <thead><tr><th>送付方法</th><th>送付状態</th><th>送付日</th><th>ファイル</th><th>備考</th></tr></thead>
+          <tbody>${rptRows}</tbody>
+        </table>
+      </div>
+
+      <!-- 対応履歴 -->
+      <div class="section-title">📝 対応履歴
+        ${!readOnly?`<button class="btn btn-secondary btn-xs" onclick="iqHistAdd()">＋ 追加</button>`:''}
+      </div>
+      <div class="table-wrap mb-3">
+        <table id="hist-table" class="hist-table">
+          <thead><tr><th style="width:140px">日付</th><th>対応内容</th>${!readOnly?'<th style="width:60px">操作</th>':''}</tr></thead>
+          <tbody id="hist-tbody">${histRows}</tbody>
+        </table>
+      </div>
+
+      <!-- アンケート回答 -->
+      <div class="section-title">📊 アンケート回答（問い合わせマスタ）</div>
+      <div class="table-wrap mb-3">${qaHtml}</div>
+
+    </div>
+    <div class="modal-footer">
+      ${!readOnly?`<button class="btn btn-primary" onclick="iqSave(${isNew})">💾 保存する</button>`:''}
+      <button class="btn btn-secondary" onclick="iqCloseModal()">閉じる</button>
+    </div>
+  </div></div>`;
+  // set select values
+  setTimeout(()=>{
+    const hs = $('eq-handlingStatus');
+    if (hs) hs.value = d.handlingStatus||'01';
+  }, 50);
+}
+
+function iqCloseModal() { $('iq-modal').innerHTML = ''; iqEditRow = null; }
+
+function iqHistAdd() {
+  const tbody = $('hist-tbody');
+  const i = tbody.querySelectorAll('tr').length;
+  const tr = document.createElement('tr');
+  const today = new Date().toISOString().slice(0,10);
+  tr.innerHTML = `
+    <td><input type="date" class="form-control" id="hist-date-${i}" value="${today}"></td>
+    <td><textarea class="form-control" id="hist-cont-${i}" rows="2"></textarea></td>
+    <td><button class="btn btn-danger btn-xs" onclick="this.closest('tr').remove()">削除</button></td>`;
+  tbody.appendChild(tr);
+}
+function iqHistDel(i) {
+  const rows = $qa('#hist-tbody tr');
+  if (rows[i]) rows[i].remove();
+}
+
+async function iqSave(isNew=false) {
+  const d = iqEditRow.aplInquiryMgnt;
+  d.aplSource = $('eq-aplSource').value;
+  d.handlingDate = ($('eq-handlingDate').value||'').replace('T',' ');
+  d.handlingStatus = $('eq-handlingStatus').value;
+  d.customerName = $('eq-customerName').value;
+  d.nameFurigana = $('eq-nameFurigana').value;
+  d.phoneNumber = $('eq-phoneNumber').value;
+  d.contactEmail = $('eq-contactEmail').value;
+  d.mailingAddress = $('eq-mailingAddress').value;
+  d.reportRecipientName = $('eq-reportRecipientName').value;
+  d.reportRecipientEmail = $('eq-reportRecipientEmail').value;
+  if (!d.customerName) { toast('氏名は必須です','error'); return; }
+
+  // collect history
+  const histRows = $qa('#hist-tbody tr');
+  const histList = histRows.map((tr,i) => {
+    const dateEl = tr.querySelector(`[id^="hist-date"]`);
+    const contEl = tr.querySelector(`[id^="hist-cont"]`);
+    const existing = (iqEditRow.bizProgressHistoryList||[])[i];
+    return {
+      id: existing ? existing.id : '',
+      inquiryId: d.id,
+      actionDate: dateEl ? dateEl.value : '',
+      actionContent: contEl ? contEl.value : ''
+    };
+  }).filter(h => h.actionDate || h.actionContent);
+
+  const body = {
+    aplInquiryMgnt: d,
+    bizProgressHistoryList: histList,
+    aplInquiryMasterList: iqEditRow.aplInquiryMasterList||[],
+    aplReportSendList: iqEditRow.aplReportSendList||[]
+  };
+  const method = (isNew || !d.id) ? 'PUT' : 'PUT';
+  const r = await api('/apl/inquiry_mgnt', { method, body: JSON.stringify(body) });
+  if (r.success || r.success===undefined) {
+    toast('保存しました');
+    iqCloseModal();
+    iqLoad(iqState.current);
+  } else {
+    toast(r.message||'保存失敗','error');
+  }
+}
+
+async function iqDel(i) {
+  const rec = iqState.rows[i];
+  const id = rec.aplInquiryMgnt.id;
+  const ok = await confirm('削除確認', `「${rec.aplInquiryMgnt.customerName}」を削除しますか？`);
+  if (!ok) return;
+  const r = await api(`/apl/inquiry_mgnt?id=${encodeURIComponent(id)}`, { method:'DELETE' });
+  if (r.success || r.success===undefined) { toast('削除しました'); iqLoad(iqState.current); }
+  else toast(r.message||'削除失敗','error');
+}
+
+// ============================================================
+//  2. 協力業者管理 (BIZ)
+// ============================================================
+let bizState = { current:1, size:10, total:0, pages:1, search:{}, rows:[] };
+let bizEditRow = null;
+
+function renderBiz() {
+  $('content').innerHTML = `
+  <div class="card">
+    <div class="search-bar">
+      <div class="form-group">
+        <label class="form-label">会社名</label>
+        <input id="biz-s-name" class="form-control" placeholder="会社名で検索">
+      </div>
+      <div class="form-group">
+        <label class="form-label">業種</label>
+        <select id="biz-s-industry" class="form-control"><option value="">--業種--</option>
+          ${(dictMap['BIZ_INDUSTRY']||[]).map(d=>`<option value="${d.value}">${d.label}</option>`).join('')}
+        </select>
+      </div>
+      <div style="display:flex;align-items:flex-end;gap:8px">
+        <button class="btn btn-primary" onclick="bizSearch()">🔍 検索</button>
+        <button class="btn btn-secondary" onclick="bizClear()">リセット</button>
+        <button class="btn btn-success" onclick="bizAdd()">＋ 協力業者追加</button>
+      </div>
+    </div>
+    <div id="biz-table-wrap"></div>
+  </div>
+  <div id="biz-modal"></div>`;
+  bizLoad(1);
+}
+async function bizLoad(page) {
+  bizState.current = page;
+  const r = await api('/biz/partner/info/page', {
+    method:'POST', body: JSON.stringify({current:page, size:bizState.size, data: bizState.search})
+  });
+  if (!r.success) { toast('取得失敗','error'); return; }
+  bizState.total = r.data.total; bizState.pages = r.data.pages; bizState.rows = r.data.records;
+  renderBizTable();
+}
+function bizSearch() {
+  bizState.search = { companyName: $('biz-s-name').value, industry: $('biz-s-industry').value };
+  bizLoad(1);
+}
+function bizClear() { $('biz-s-name').value=''; $('biz-s-industry').value=''; bizState.search={}; bizLoad(1); }
+
+const PREFECTURE_MAP = {'01':'北海道','13':'東京都','14':'神奈川県','22':'静岡県','23':'愛知県','27':'大阪府','34':'広島県','40':'福岡県'};
+
+function renderBizTable() {
+  const wrap = $('biz-table-wrap');
+  let html = `<div class="table-wrap"><table>
+    <thead><tr><th>会社名</th><th>担当者</th><th>業種</th><th>ランク</th><th>TEL</th><th>都道府県</th><th>登録日</th><th>操作</th></tr></thead><tbody>`;
+  bizState.rows.forEach((rec, i) => {
+    const d = rec;
+    html += `<tr ondblclick="bizView(${i})">
+      <td><strong>${escHtml(d.companyName||'')}</strong></td>
+      <td>${escHtml(d.representativeName||'')}</td>
+      <td>${escHtml(dictLabel('BIZ_INDUSTRY', d.industry)||'')}</td>
+      <td><span class="badge badge-${d.partnerRank||'C'}">${escHtml(dictLabel('BIZ_PARTNER_RANK', d.partnerRank)||d.partnerRank||'')}</span></td>
+      <td>${escHtml(d.tel||'')}</td>
+      <td>${escHtml(PREFECTURE_MAP[d.prefecture]||d.prefecture||'')}</td>
+      <td>${fmtDate(d.registrationDate||d.createAt)}</td>
+      <td>
+        <button class="btn btn-secondary btn-xs" onclick="bizView(${i})">詳細</button>
+        <button class="btn btn-primary btn-xs" onclick="bizEdit(${i})">編集</button>
+        <button class="btn btn-danger btn-xs" onclick="bizDel(${i})">削除</button>
+      </td></tr>`;
+  });
+  html += '</tbody></table></div>';
+  wrap.innerHTML = html;
+  renderPagination(wrap, bizState.current, bizState.pages, bizState.total, bizState.size, 'bizLoad');
+}
+
+async function bizView(i) {
+  const rec = bizState.rows[i];
+  const r = await api(`/biz/partner/info?id=${encodeURIComponent(rec.id)}`);
+  bizEditRow = r.success ? r.data : rec;
+  renderBizModal(true);
+}
+async function bizEdit(i) {
+  const rec = bizState.rows[i];
+  const r = await api(`/biz/partner/info?id=${encodeURIComponent(rec.id)}`);
+  bizEditRow = r.success ? r.data : rec;
+  renderBizModal(false);
+}
+function bizAdd() {
+  bizEditRow = {};
+  renderBizModal(false, true);
+}
+
+function renderBizModal(readOnly, isNew=false) {
+  const d = bizEditRow || {};
+  const dis = readOnly ? 'disabled' : '';
+  const title = isNew ? '協力業者追加' : readOnly ? '協力業者詳細' : '協力業者編集';
+  const prefOpts = Object.entries(PREFECTURE_MAP).map(([v,l])=>`<option value="${v}" ${d.prefecture==v?'selected':''}>${l}</option>`).join('');
+  const industryOpts = (dictMap['BIZ_INDUSTRY']||[]).map(o=>`<option value="${o.value}" ${d.industry==o.value?'selected':''}>${o.label}</option>`).join('');
+  const rankOpts = (dictMap['BIZ_PARTNER_RANK']||[]).map(o=>`<option value="${o.value}" ${d.partnerRank==o.value?'selected':''}>${o.label}</option>`).join('');
+  const serviceAreaOpts = (dictMap['BIZ_SERVICE_AREA']||[]).map(o=>`<option value="${o.value}" ${(d.serviceArea||[]).includes(o.value)?'selected':''}>${o.label}</option>`).join('');
+
+  $('biz-modal').innerHTML = `<div class="modal-overlay" onclick="if(event.target===this)bizCloseModal()">
+  <div class="modal modal-lg">
+    <div class="modal-header"><h2>${title}</h2><button class="modal-close" onclick="bizCloseModal()">✕</button></div>
+    <div class="modal-body">
+
+      <div class="section-title">📋 基本情報</div>
+      <div class="form-grid mb-3">
+        <div class="form-group">
+          <label class="form-label">レコード番号</label>
+          <input id="biz-recordNo" class="form-control" value="${escHtml(d.recordNo||'')}" ${dis}>
+        </div>
+        <div class="form-group">
+          <label class="form-label">協力業者ランク</label>
+          <select id="biz-partnerRank" class="form-control" ${dis}><option value="">--</option>${rankOpts}</select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">業種</label>
+          <select id="biz-industry" class="form-control" ${dis}><option value="">--</option>${industryOpts}</select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">その他</label>
+          <input id="biz-other" class="form-control" value="${escHtml(d.other||'')}" ${dis}>
+        </div>
+        <div class="form-group">
+          <label class="form-label">登録日</label>
+          <input id="biz-registrationDate" type="date" class="form-control" value="${fmtDate(d.registrationDate||d.createAt)}" ${dis}>
+        </div>
+      </div>
+
+      <div class="section-title">🏢 企業概要</div>
+      <div class="form-grid mb-3">
+        <div class="form-group">
+          <label class="form-label required">会社名</label>
+          <input id="biz-companyName" class="form-control" value="${escHtml(d.companyName||'')}" ${dis} maxlength="255">
+        </div>
+        <div class="form-group">
+          <label class="form-label">部署名</label>
+          <input id="biz-departmentName" class="form-control" value="${escHtml(d.departmentName||'')}" ${dis}>
+        </div>
+        <div class="form-group">
+          <label class="form-label">担当者名</label>
+          <input id="biz-representativeName" class="form-control" value="${escHtml(d.representativeName||'')}" ${dis}>
+        </div>
+        <div class="form-group">
+          <label class="form-label">役職</label>
+          <input id="biz-position" class="form-control" value="${escHtml(d.position||'')}" ${dis}>
+        </div>
+        <div class="form-group">
+          <label class="form-label">郵便番号</label>
+          <input id="biz-postalCode" class="form-control" value="${escHtml(d.postalCode||'')}" ${dis}>
+        </div>
+        <div class="form-group">
+          <label class="form-label">都道府県</label>
+          <select id="biz-prefecture" class="form-control" ${dis}><option value="">--</option>${prefOpts}</select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">以降の住所</label>
+          <input id="biz-address" class="form-control" value="${escHtml(d.address||'')}" ${dis}>
+        </div>
+        <div class="form-group">
+          <label class="form-label">TEL</label>
+          <input id="biz-tel" class="form-control" value="${escHtml(d.tel||'')}" ${dis}>
+        </div>
+        <div class="form-group">
+          <label class="form-label">FAX</label>
+          <input id="biz-fax" class="form-control" value="${escHtml(d.fax||'')}" ${dis}>
+        </div>
+        <div class="form-group">
+          <label class="form-label">担当者携帯</label>
+          <input id="biz-mobile" class="form-control" value="${escHtml(d.mobile||'')}" ${dis}>
+        </div>
+        <div class="form-group">
+          <label class="form-label">メールアドレス</label>
+          <input id="biz-email" type="email" class="form-control" value="${escHtml(d.email||'')}" ${dis}>
+        </div>
+        <div class="form-group">
+          <label class="form-label">ホームページ</label>
+          <input id="biz-homepage" type="url" class="form-control" value="${escHtml(d.homepage||'')}" ${dis}>
+        </div>
+        <div class="form-group">
+          <label class="form-label">対応エリア</label>
+          <select id="biz-serviceArea" class="form-control" multiple size="4" ${dis}>${serviceAreaOpts}</select>
+        </div>
+        <div class="form-group form-grid-full">
+          <label class="form-label">提供サービス</label>
+          <textarea id="biz-providedService" class="form-control" ${dis}>${escHtml(d.providedService||'')}</textarea>
+        </div>
+        <div class="form-group form-grid-full">
+          <label class="form-label">メモ</label>
+          <textarea id="biz-memo" class="form-control" ${dis}>${escHtml(d.memo||'')}</textarea>
+        </div>
+      </div>
+
+      <div class="section-title">📎 依頼案件</div>
+      <div class="form-group">
+        <label class="form-label">送客案件リンク</label>
+        <input id="biz-customerCaseLink" class="form-control" value="${escHtml(d.customerCaseLink||'')}" ${dis}>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      ${!readOnly?`<button class="btn btn-primary" onclick="bizSave(${isNew})">💾 保存する</button>`:''}
+      <button class="btn btn-secondary" onclick="bizCloseModal()">閉じる</button>
+    </div>
+  </div></div>`;
+}
+
+function bizCloseModal() { $('biz-modal').innerHTML = ''; bizEditRow = null; }
+
+async function bizSave(isNew) {
+  const companyName = $('biz-companyName').value;
+  if (!companyName) { toast('会社名は必須です','error'); return; }
+  const serviceAreaSel = $('biz-serviceArea');
+  const serviceArea = serviceAreaSel ? [...serviceAreaSel.selectedOptions].map(o=>o.value) : [];
+  const body = {
+    id: bizEditRow.id || '',
+    recordNo: $('biz-recordNo').value,
+    partnerRank: $('biz-partnerRank').value,
+    industry: $('biz-industry').value,
+    other: $('biz-other').value,
+    registrationDate: $('biz-registrationDate').value,
+    companyName, departmentName: $('biz-departmentName').value,
+    representativeName: $('biz-representativeName').value,
+    position: $('biz-position').value,
+    postalCode: $('biz-postalCode').value,
+    prefecture: $('biz-prefecture').value,
+    address: $('biz-address').value,
+    tel: $('biz-tel').value, fax: $('biz-fax').value, mobile: $('biz-mobile').value,
+    email: $('biz-email').value, homepage: $('biz-homepage').value,
+    serviceArea, providedService: $('biz-providedService').value,
+    memo: $('biz-memo').value, customerCaseLink: $('biz-customerCaseLink').value,
+  };
+  const method = isNew ? 'POST' : 'PUT';
+  const r = await api('/biz/partner/info', { method, body: JSON.stringify(body) });
+  if (r.success || r.success===undefined) { toast('保存しました'); bizCloseModal(); bizLoad(bizState.current); }
+  else toast(r.message||'保存失敗','error');
+}
+async function bizDel(i) {
+  const rec = bizState.rows[i];
+  const ok = await confirm('削除確認', `「${rec.companyName}」を削除しますか？`);
+  if (!ok) return;
+  const r = await api(`/biz/partner/info?id=${encodeURIComponent(rec.id)}`, { method:'DELETE' });
+  if (r.success || r.success===undefined) { toast('削除しました'); bizLoad(bizState.current); }
+  else toast(r.message||'削除失敗','error');
+}
+
+// ============================================================
+//  3. 見込み顧客管理 (POT)
+// ============================================================
+let potState = { current:1, size:10, total:0, pages:1, search:{}, rows:[] };
+let potEditRow = null;
+
+function renderPot() {
+  $('content').innerHTML = `
+  <div class="card">
+    <div class="search-bar">
+      <div class="form-group">
+        <label class="form-label">氏名</label>
+        <input id="pot-s-name" class="form-control" placeholder="氏名で検索">
+      </div>
+      <div class="form-group">
+        <label class="form-label">対応状況</label>
+        <select id="pot-s-status" class="form-control"><option value="">--</option>
+          ${(dictMap['SCM_POTENTIAL_RESP_STATUS']||[]).map(d=>`<option value="${d.value}">${d.label}</option>`).join('')}
+        </select>
+      </div>
+      <div style="display:flex;align-items:flex-end;gap:8px">
+        <button class="btn btn-primary" onclick="potSearch()">🔍 検索</button>
+        <button class="btn btn-secondary" onclick="potClear()">リセット</button>
+        <button class="btn btn-success" onclick="potAdd()">＋ 見込み顧客追加</button>
+      </div>
+    </div>
+    <div id="pot-table-wrap"></div>
+  </div>
+  <div id="pot-modal"></div>`;
+  potLoad(1);
+}
+async function potLoad(page) {
+  potState.current = page;
+  const r = await api('/pot/potential/master/page', {
+    method:'POST', body: JSON.stringify({current:page, size:potState.size, data: potState.search})
+  });
+  if (!r.success) { toast('取得失敗','error'); return; }
+  potState.total = r.data.total; potState.pages = r.data.pages; potState.rows = r.data.records;
+  renderPotTable();
+}
+function potSearch() {
+  potState.search = { consultantName: $('pot-s-name').value, handlingStatus: $('pot-s-status').value };
+  potLoad(1);
+}
+function potClear() { $('pot-s-name').value=''; $('pot-s-status').value=''; potState.search={}; potLoad(1); }
+
+function renderPotTable() {
+  const wrap = $('pot-table-wrap');
+  let html = `<div class="table-wrap"><table>
+    <thead><tr><th>案件ID</th><th>対応状況</th><th>受付日</th><th>流入経路</th><th>氏名</th><th>電話番号</th><th>ランク</th><th>確度</th><th>操作</th></tr></thead><tbody>`;
+  potState.rows.forEach((rec, i) => {
+    const m = rec.potPotentialMaster;
+    const c = rec.potCustomerInfo || {};
+    const sts = m.handlingStatus;
+    html += `<tr ondblclick="potView(${i})">
+      <td style="font-family:monospace;font-size:11px">${escHtml(m.id)}</td>
+      <td><span class="badge ${IQ_STATUS_CLS[sts]||'badge-01'}">${IQ_STATUS_LABEL[sts]||sts||'--'}</span></td>
+      <td>${fmtDate(m.receptionDate)}</td>
+      <td>${escHtml(IQ_SOURCE_LABEL[m.potSource]||m.potSource||'')}</td>
+      <td><strong>${escHtml(c.consultantName||'')}</strong></td>
+      <td>${escHtml(c.phoneNumber||c.mobileNumber||'')}</td>
+      <td><span class="badge badge-${m.potRank||'C'}">${m.potRank||'C'}ランク</span></td>
+      <td>${escHtml(m.certainty||'')}${m.certainty?'%':''}</td>
+      <td>
+        <button class="btn btn-secondary btn-xs" onclick="potView(${i})">詳細</button>
+        <button class="btn btn-primary btn-xs" onclick="potEdit(${i})">編集</button>
+        <button class="btn btn-danger btn-xs" onclick="potDel(${i})">削除</button>
+      </td></tr>`;
+  });
+  html += '</tbody></table></div>';
+  wrap.innerHTML = html;
+  renderPagination(wrap, potState.current, potState.pages, potState.total, potState.size, 'potLoad');
+}
+
+async function potView(i) {
+  const rec = potState.rows[i];
+  const r = await api(`/pot/potential/master?id=${encodeURIComponent(rec.potPotentialMaster.id)}`);
+  potEditRow = r.success ? r.data : rec;
+  renderPotModal(true);
+}
+async function potEdit(i) {
+  const rec = potState.rows[i];
+  const r = await api(`/pot/potential/master?id=${encodeURIComponent(rec.potPotentialMaster.id)}`);
+  potEditRow = r.success ? r.data : rec;
+  renderPotModal(false);
+}
+function potAdd() { potEditRow = { potPotentialMaster:{}, potCustomerInfo:{}, potRealEstateSummary:{} }; renderPotModal(false, true); }
+
+function renderPotModal(readOnly, isNew=false) {
+  const m = (potEditRow.potPotentialMaster) || {};
+  const c = (potEditRow.potCustomerInfo) || {};
+  const e = (potEditRow.potRealEstateSummary) || {};
+  const dis = readOnly ? 'disabled' : '';
+  const title = isNew ? '見込み顧客追加' : readOnly ? '見込み顧客詳細' : '見込み顧客編集';
+  const statusOpts = (dictMap['SCM_POTENTIAL_RESP_STATUS']||[]).map(o=>`<option value="${o.value}" ${m.handlingStatus==o.value?'selected':''}>${o.label}</option>`).join('');
+  const rankOpts = (dictMap['SCM_INTERVIEW_RANK']||[]).map(o=>`<option value="${o.value}" ${m.potRank==o.value?'selected':''}>${o.label}</option>`).join('');
+
+  $('pot-modal').innerHTML = `<div class="modal-overlay" onclick="if(event.target===this)potCloseModal()">
+  <div class="modal modal-lg">
+    <div class="modal-header"><h2>${title}</h2><button class="modal-close" onclick="potCloseModal()">✕</button></div>
+    <div class="modal-body">
+
+      <div class="section-title">📋 案件情報</div>
+      <div class="form-grid mb-3">
+        <div class="form-group">
+          <label class="form-label">案件ID</label>
+          <input class="form-control" value="${escHtml(m.id||'（新規）')}" disabled>
+        </div>
+        <div class="form-group">
+          <label class="form-label">対応状況</label>
+          <select id="pot-handlingStatus" class="form-control" ${dis}><option value="">--</option>${statusOpts}</select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">受付日</label>
+          <input id="pot-receptionDate" type="date" class="form-control" value="${fmtDate(m.receptionDate)}" ${dis}>
+        </div>
+        <div class="form-group">
+          <label class="form-label">流入経路</label>
+          <select id="pot-potSource" class="form-control" ${dis}>
+            <option value="">--</option>
+            <option value="AKICON" ${m.potSource==='AKICON'?'selected':''}>アキコン</option>
+            <option value="TEL" ${m.potSource==='TEL'?'selected':''}>電話</option>
+            <option value="SHOKAI" ${m.potSource==='SHOKAI'?'selected':''}>紹介</option>
+            <option value="EVENT" ${m.potSource==='EVENT'?'selected':''}>イベント</option>
+            <option value="SNS" ${m.potSource==='SNS'?'selected':''}>SNS</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">案件ランク</label>
+          <select id="pot-potRank" class="form-control" ${dis}><option value="">--</option>${rankOpts}</select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">確度（%）</label>
+          <input id="pot-certainty" type="number" min="0" max="100" class="form-control" value="${escHtml(m.certainty||'')}" ${dis}>
+        </div>
+        <div class="form-group">
+          <label class="form-label">問い合わせID</label>
+          <input id="pot-inquiryId" class="form-control" value="${escHtml(m.inquiryId||'')}" ${dis}>
+        </div>
+        <div class="form-group form-grid-full">
+          <label class="form-label">案件詳細</label>
+          <textarea id="pot-potDetails" class="form-control" ${dis}>${escHtml(m.potDetails||'')}</textarea>
+        </div>
+      </div>
+
+      <div class="section-title">👤 相談者情報</div>
+      <div class="form-grid mb-3">
+        <div class="form-group">
+          <label class="form-label">氏名</label>
+          <input id="pot-consultantName" class="form-control" value="${escHtml(c.consultantName||'')}" ${dis}>
+        </div>
+        <div class="form-group">
+          <label class="form-label">フリガナ</label>
+          <input id="pot-furigana" class="form-control" value="${escHtml(c.furigana||'')}" ${dis}>
+        </div>
+        <div class="form-group">
+          <label class="form-label">電話番号</label>
+          <input id="pot-phoneNumber" class="form-control" value="${escHtml(c.phoneNumber||'')}" ${dis}>
+        </div>
+        <div class="form-group">
+          <label class="form-label">携帯番号</label>
+          <input id="pot-mobileNumber" class="form-control" value="${escHtml(c.mobileNumber||'')}" ${dis}>
+        </div>
+        <div class="form-group">
+          <label class="form-label">メールアドレス</label>
+          <input id="pot-emailAddress" type="email" class="form-control" value="${escHtml(c.emailAddress||'')}" ${dis}>
+        </div>
+        <div class="form-group">
+          <label class="form-label">レポート送付メール</label>
+          <input id="pot-reportSendingEmail" type="email" class="form-control" value="${escHtml(c.reportSendingEmail||'')}" ${dis}>
+        </div>
+        <div class="form-group">
+          <label class="form-label">現在地</label>
+          <input id="pot-currentResidence" class="form-control" value="${escHtml(c.currentResidence||'')}" ${dis}>
+        </div>
+        <div class="form-group">
+          <label class="form-label">住所（居住地）</label>
+          <input id="pot-residence" class="form-control" value="${escHtml(c.residence||'')}" ${dis}>
+        </div>
+        <div class="form-group">
+          <label class="form-label">住所郵便番号</label>
+          <input id="pot-residencePostalCode" class="form-control" value="${escHtml(c.residencePostalCode||'')}" ${dis}>
+        </div>
+        <div class="form-group">
+          <label class="form-label">住所（詳細）</label>
+          <input id="pot-residenceAddress" class="form-control" value="${escHtml(c.residenceAddress||'')}" ${dis}>
+        </div>
+        <div class="form-group">
+          <label class="form-label">郵送先住所</label>
+          <input id="pot-postalAddress" class="form-control" value="${escHtml(c.postalAddress||'')}" ${dis}>
+        </div>
+      </div>
+
+      <div class="section-title">🏠 不動産情報</div>
+      <div class="form-grid mb-3">
+        <div class="form-group">
+          <label class="form-label">所在地</label>
+          <input id="pot-location" class="form-control" value="${escHtml(e.location||'')}" ${dis}>
+        </div>
+        <div class="form-group">
+          <label class="form-label">空き家期間（年）</label>
+          <input id="pot-vacantYears" class="form-control" value="${escHtml(e.vacantYears||'')}" ${dis}>
+        </div>
+        <div class="form-group">
+          <label class="form-label">土地面積（㎡）</label>
+          <input id="pot-landArea" class="form-control" value="${escHtml(e.landArea||'')}" ${dis}>
+        </div>
+        <div class="form-group">
+          <label class="form-label">建物面積（㎡）</label>
+          <input id="pot-buildingArea" class="form-control" value="${escHtml(e.buildingArea||'')}" ${dis}>
+        </div>
+        <div class="form-group">
+          <label class="form-label">建築年（築年数）</label>
+          <input id="pot-buildingYear" class="form-control" value="${escHtml(e.buildingYear||'')}" ${dis}>
+        </div>
+        <div class="form-group form-grid-full">
+          <label class="form-label">メモ</label>
+          <textarea id="pot-estate-memo" class="form-control" ${dis}>${escHtml(e.memo||'')}</textarea>
+        </div>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      ${!readOnly?`<button class="btn btn-primary" onclick="potSave(${isNew})">💾 保存する</button>`:''}
+      <button class="btn btn-secondary" onclick="potCloseModal()">閉じる</button>
+    </div>
+  </div></div>`;
+}
+
+function potCloseModal() { $('pot-modal').innerHTML = ''; potEditRow = null; }
+
+async function potSave(isNew) {
+  const m = (potEditRow.potPotentialMaster)||{};
+  const body = {
+    potPotentialMaster: {
+      id: m.id||'',
+      handlingStatus: $('pot-handlingStatus').value,
+      receptionDate: $('pot-receptionDate').value,
+      potSource: $('pot-potSource').value,
+      potRank: $('pot-potRank').value,
+      certainty: $('pot-certainty').value,
+      inquiryId: $('pot-inquiryId').value,
+      potDetails: $('pot-potDetails').value,
+    },
+    potCustomerInfo: {
+      consultantName: $('pot-consultantName').value,
+      furigana: $('pot-furigana').value,
+      phoneNumber: $('pot-phoneNumber').value,
+      mobileNumber: $('pot-mobileNumber').value,
+      emailAddress: $('pot-emailAddress').value,
+      reportSendingEmail: $('pot-reportSendingEmail').value,
+      currentResidence: $('pot-currentResidence').value,
+      residence: $('pot-residence').value,
+      residencePostalCode: $('pot-residencePostalCode').value,
+      residenceAddress: $('pot-residenceAddress').value,
+      postalAddress: $('pot-postalAddress').value,
+    },
+    potRealEstateSummary: {
+      location: $('pot-location').value,
+      vacantYears: $('pot-vacantYears').value,
+      landArea: $('pot-landArea').value,
+      buildingArea: $('pot-buildingArea').value,
+      buildingYear: $('pot-buildingYear').value,
+      memo: $('pot-estate-memo').value,
+    }
+  };
+  const r = await api('/pot/potential/master', { method:'POST', body: JSON.stringify(body) });
+  if (r.success || r.success===undefined) { toast('保存しました'); potCloseModal(); potLoad(potState.current); }
+  else toast(r.message||'保存失敗','error');
+}
+async function potDel(i) {
+  const rec = potState.rows[i];
+  const id = rec.potPotentialMaster.id;
+  const name = rec.potCustomerInfo?.consultantName || id;
+  const ok = await confirm('削除確認', `「${name}」を削除しますか？`);
+  if (!ok) return;
+  const r = await api(`/pot/potential/master?id=${encodeURIComponent(id)}`, { method:'DELETE' });
+  if (r.success || r.success===undefined) { toast('削除しました'); potLoad(potState.current); }
+  else toast(r.message||'削除失敗','error');
+}
+
+// ============================================================
+//  4. 施工業者管理 (PRO)
+// ============================================================
+let proState = { current:1, size:10, total:0, pages:1, search:{}, rows:[] };
+let proEditRow = null;
+
+function renderPro() {
+  $('content').innerHTML = `
+  <div class="card">
+    <div class="search-bar">
+      <div class="form-group">
+        <label class="form-label">氏名</label>
+        <input id="pro-s-name" class="form-control" placeholder="氏名で検索">
+      </div>
+      <div class="form-group">
+        <label class="form-label">対応状況</label>
+        <select id="pro-s-status" class="form-control"><option value="">--</option>
+          ${(dictMap['SCM_CUS_RESP_STATUS']||[]).map(d=>`<option value="${d.value}">${d.label}</option>`).join('')}
+        </select>
+      </div>
+      <div style="display:flex;align-items:flex-end;gap:8px">
+        <button class="btn btn-primary" onclick="proSearch()">🔍 検索</button>
+        <button class="btn btn-secondary" onclick="proClear()">リセット</button>
+        <button class="btn btn-success" onclick="proAdd()">＋ 施工業者追加</button>
+      </div>
+    </div>
+    <div id="pro-table-wrap"></div>
+  </div>
+  <div id="pro-modal"></div>`;
+  proLoad(1);
+}
+async function proLoad(page) {
+  proState.current = page;
+  const r = await api('/pro/contractor/info/page', {
+    method:'POST', body: JSON.stringify({current:page, size:proState.size, data: proState.search})
+  });
+  if (!r.success) { toast('取得失敗','error'); return; }
+  proState.total = r.data.total; proState.pages = r.data.pages;
+  proState.rows = r.data.records.map(rec => rec.proContractorInfo || rec);
+  renderProTable();
+}
+function proSearch() {
+  proState.search = { consultantName: $('pro-s-name').value, status: $('pro-s-status').value };
+  proLoad(1);
+}
+function proClear() { $('pro-s-name').value=''; $('pro-s-status').value=''; proState.search={}; proLoad(1); }
+
+function renderProTable() {
+  const wrap = $('pro-table-wrap');
+  let html = `<div class="table-wrap"><table>
+    <thead><tr><th>顧客ID</th><th>対応状況</th><th>受付日</th><th>氏名</th><th>フリガナ</th><th>TEL</th><th>メール</th><th>居住エリア</th><th>操作</th></tr></thead><tbody>`;
+  proState.rows.forEach((d, i) => {
+    const sts = d.status;
+    html += `<tr ondblclick="proView(${i})">
+      <td style="font-family:monospace;font-size:11px">${escHtml(d.id)}</td>
+      <td><span class="badge ${IQ_STATUS_CLS[sts]||'badge-01'}">${IQ_STATUS_LABEL[sts]||sts||'--'}</span></td>
+      <td>${fmtDate(d.receptionDate)}</td>
+      <td><strong>${escHtml(d.consultantName||'')}</strong></td>
+      <td>${escHtml(d.furigana||'')}</td>
+      <td>${escHtml(d.tel||d.mobileNumber||'')}</td>
+      <td>${escHtml(d.emailAddress||'')}</td>
+      <td>${escHtml(d.residenceArea||'')}</td>
+      <td>
+        <button class="btn btn-secondary btn-xs" onclick="proView(${i})">詳細</button>
+        <button class="btn btn-primary btn-xs" onclick="proEdit(${i})">編集</button>
+        <button class="btn btn-danger btn-xs" onclick="proDel(${i})">削除</button>
+      </td></tr>`;
+  });
+  html += '</tbody></table></div>';
+  wrap.innerHTML = html;
+  renderPagination(wrap, proState.current, proState.pages, proState.total, proState.size, 'proLoad');
+}
+
+async function proView(i) {
+  const rec = proState.rows[i];
+  const r = await api(`/pro/contractor/info?id=${encodeURIComponent(rec.id)}`);
+  proEditRow = r.success ? (r.data.proContractorInfo || r.data) : rec;
+  renderProModal(true);
+}
+async function proEdit(i) {
+  const rec = proState.rows[i];
+  const r = await api(`/pro/contractor/info?id=${encodeURIComponent(rec.id)}`);
+  proEditRow = r.success ? (r.data.proContractorInfo || r.data) : rec;
+  renderProModal(false);
+}
+function proAdd() { proEditRow = {}; renderProModal(false, true); }
+
+function renderProModal(readOnly, isNew=false) {
+  const d = proEditRow || {};
+  const dis = readOnly ? 'disabled' : '';
+  const title = isNew ? '施工業者追加' : readOnly ? '施工業者詳細' : '施工業者編集';
+  const statusOpts = (dictMap['SCM_CUS_RESP_STATUS']||[]).map(o=>`<option value="${o.value}" ${d.status==o.value?'selected':''}>${o.label}</option>`).join('');
+  const contactOpts = (dictMap['PREFERRED_CONTACT']||[]).map(o=>`<option value="${o.value}" ${d.preferredContactMethod==o.value?'selected':''}>${o.label}</option>`).join('');
+
+  $('pro-modal').innerHTML = `<div class="modal-overlay" onclick="if(event.target===this)proCloseModal()">
+  <div class="modal modal-lg">
+    <div class="modal-header"><h2>${title}</h2><button class="modal-close" onclick="proCloseModal()">✕</button></div>
+    <div class="modal-body">
+
+      <div class="section-title">📋 案件情報</div>
+      <div class="form-grid mb-3">
+        <div class="form-group">
+          <label class="form-label">対応状況</label>
+          <select id="pro-status" class="form-control" ${dis}><option value="">--</option>${statusOpts}</select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">受付日</label>
+          <input id="pro-receptionDate" type="date" class="form-control" value="${fmtDate(d.receptionDate)}" ${dis}>
+        </div>
+        <div class="form-group">
+          <label class="form-label">担当者</label>
+          <input id="pro-caseHandler" class="form-control" value="${escHtml(d.caseHandler||'')}" ${dis}>
+        </div>
+        <div class="form-group">
+          <label class="form-label">見込み顧客ID</label>
+          <input id="pro-potId" class="form-control" value="${escHtml(d.potId||'')}" ${dis}>
+        </div>
+        <div class="form-group">
+          <label class="form-label">流入経路</label>
+          <select id="pro-caseSource" class="form-control" ${dis}>
+            <option value="">--</option>
+            <option value="AKICON" ${d.caseSource==='AKICON'?'selected':''}>アキコン</option>
+            <option value="TEL" ${d.caseSource==='TEL'?'selected':''}>電話</option>
+            <option value="SHOKAI" ${d.caseSource==='SHOKAI'?'selected':''}>紹介</option>
+          </select>
+        </div>
+        <div class="form-group form-grid-full">
+          <label class="form-label">案件詳細</label>
+          <textarea id="pro-caseDetails" class="form-control" ${dis}>${escHtml(d.caseDetails||'')}</textarea>
+        </div>
+      </div>
+
+      <div class="section-title">👤 顧客情報</div>
+      <div class="form-grid mb-3">
+        <div class="form-group">
+          <label class="form-label">氏名</label>
+          <input id="pro-consultantName" class="form-control" value="${escHtml(d.consultantName||'')}" ${dis}>
+        </div>
+        <div class="form-group">
+          <label class="form-label">フリガナ</label>
+          <input id="pro-furigana" class="form-control" value="${escHtml(d.furigana||'')}" ${dis}>
+        </div>
+        <div class="form-group">
+          <label class="form-label">TEL</label>
+          <input id="pro-tel" class="form-control" value="${escHtml(d.tel||'')}" ${dis}>
+        </div>
+        <div class="form-group">
+          <label class="form-label">携帯番号</label>
+          <input id="pro-mobileNumber" class="form-control" value="${escHtml(d.mobileNumber||'')}" ${dis}>
+        </div>
+        <div class="form-group">
+          <label class="form-label">メールアドレス</label>
+          <input id="pro-emailAddress" type="email" class="form-control" value="${escHtml(d.emailAddress||'')}" ${dis}>
+        </div>
+        <div class="form-group">
+          <label class="form-label">希望連絡方法</label>
+          <select id="pro-preferredContactMethod" class="form-control" ${dis}><option value="">--</option>${contactOpts}</select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">住所郵便番号</label>
+          <input id="pro-residencePostalCode" class="form-control" value="${escHtml(d.residencePostalCode||'')}" ${dis}>
+        </div>
+        <div class="form-group">
+          <label class="form-label">居住エリア</label>
+          <input id="pro-residenceArea" class="form-control" value="${escHtml(d.residenceArea||'')}" ${dis}>
+        </div>
+        <div class="form-group">
+          <label class="form-label">居住住所</label>
+          <input id="pro-residenceAddress" class="form-control" value="${escHtml(d.residenceAddress||'')}" ${dis}>
+        </div>
+        <div class="form-group">
+          <label class="form-label">郵送先住所</label>
+          <input id="pro-postalAddress" class="form-control" value="${escHtml(d.postalAddress||'')}" ${dis}>
+        </div>
+        <div class="form-group">
+          <label class="form-label">対応可能日</label>
+          <input id="pro-availableDays" class="form-control" value="${escHtml(d.availableDays||'')}" ${dis}>
+        </div>
+        <div class="form-group">
+          <label class="form-label">対応可能時間</label>
+          <input id="pro-availableTime" class="form-control" value="${escHtml(d.availableTime||'')}" ${dis}>
+        </div>
+        <div class="form-group form-grid-full">
+          <label class="form-label">その他条件</label>
+          <textarea id="pro-otherConditions" class="form-control" ${dis}>${escHtml(d.otherConditions||'')}</textarea>
+        </div>
+        <div class="form-group form-grid-full">
+          <label class="form-label">メモ</label>
+          <textarea id="pro-memo" class="form-control" ${dis}>${escHtml(d.memo||'')}</textarea>
+        </div>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      ${!readOnly?`<button class="btn btn-primary" onclick="proSave(${isNew})">💾 保存する</button>`:''}
+      <button class="btn btn-secondary" onclick="proCloseModal()">閉じる</button>
+    </div>
+  </div></div>`;
+}
+
+function proCloseModal() { $('pro-modal').innerHTML = ''; proEditRow = null; }
+
+async function proSave(isNew) {
+  const body = {
+    proContractorInfo: {
+      id: proEditRow.id || '',
+      status: $('pro-status').value,
+      receptionDate: $('pro-receptionDate').value,
+      caseHandler: $('pro-caseHandler').value,
+      potId: $('pro-potId').value,
+      caseSource: $('pro-caseSource').value,
+      caseDetails: $('pro-caseDetails').value,
+      consultantName: $('pro-consultantName').value,
+      furigana: $('pro-furigana').value,
+      tel: $('pro-tel').value,
+      mobileNumber: $('pro-mobileNumber').value,
+      emailAddress: $('pro-emailAddress').value,
+      preferredContactMethod: $('pro-preferredContactMethod').value,
+      residencePostalCode: $('pro-residencePostalCode').value,
+      residenceArea: $('pro-residenceArea').value,
+      residenceAddress: $('pro-residenceAddress').value,
+      postalAddress: $('pro-postalAddress').value,
+      availableDays: $('pro-availableDays').value,
+      availableTime: $('pro-availableTime').value,
+      otherConditions: $('pro-otherConditions').value,
+      memo: $('pro-memo').value,
+    }
+  };
+  const method = isNew ? 'POST' : 'POST';
+  const r = await api('/pro/contractor/info', { method, body: JSON.stringify(body) });
+  if (r.success || r.success===undefined) { toast('保存しました'); proCloseModal(); proLoad(proState.current); }
+  else toast(r.message||'保存失敗','error');
+}
+async function proDel(i) {
+  const rec = proState.rows[i];
+  const ok = await confirm('削除確認', `「${rec.consultantName||rec.id}」を削除しますか？`);
+  if (!ok) return;
+  const r = await api(`/pro/contractor/info?id=${encodeURIComponent(rec.id)}`, { method:'DELETE' });
+  if (r.success || r.success===undefined) { toast('削除しました'); proLoad(proState.current); }
+  else toast(r.message||'削除失敗','error');
+}
+
+// ============================================================
+//  5. ユーザー管理 (SYS USER)
+// ============================================================
+let userState = { current:1, size:10, total:0, pages:1, search:{}, rows:[] };
+let userEditRow = null;
+
+function renderUser() {
+  $('content').innerHTML = `
+  <div class="card">
+    <div class="search-bar">
+      <div class="form-group">
+        <label class="form-label">ユーザーID</label>
+        <input id="usr-s-name" class="form-control" placeholder="ユーザーIDで検索">
+      </div>
+      <div class="form-group">
+        <label class="form-label">ユーザー区分</label>
+        <select id="usr-s-type" class="form-control"><option value="">--</option>
+          ${(dictMap['SYS_USER_TYPE']||[]).map(d=>`<option value="${d.value}">${d.label}</option>`).join('')}
+        </select>
+      </div>
+      <div style="display:flex;align-items:flex-end;gap:8px">
+        <button class="btn btn-primary" onclick="userSearch()">🔍 検索</button>
+        <button class="btn btn-secondary" onclick="userClear()">リセット</button>
+        <button class="btn btn-success" onclick="userAdd()">＋ ユーザー追加</button>
+      </div>
+    </div>
+    <div id="usr-table-wrap"></div>
+  </div>
+  <div id="usr-modal"></div>`;
+  userLoad(1);
+}
+async function userLoad(page) {
+  userState.current = page;
+  const r = await api('/sys/user/page', {
+    method:'POST', body: JSON.stringify({current:page, size:userState.size, data: userState.search})
+  });
+  if (!r.success) { toast('取得失敗','error'); return; }
+  userState.total = r.data.total; userState.pages = r.data.pages;
+  userState.rows = r.data.records.map(rec => rec.sysUser || rec);
+  renderUserTable();
+}
+function userSearch() {
+  userState.search = { fullName: $('usr-s-name').value, userType: $('usr-s-type').value };
+  userLoad(1);
+}
+function userClear() { $('usr-s-name').value=''; $('usr-s-type').value=''; userState.search={}; userLoad(1); }
+
+function renderUserTable() {
+  const wrap = $('usr-table-wrap');
+  let html = `<div class="table-wrap"><table>
+    <thead><tr><th>ユーザーID</th><th>メールアドレス</th><th>ユーザー区分</th><th>ロール</th><th>作成日</th><th>操作</th></tr></thead><tbody>`;
+  userState.rows.forEach((d, i) => {
+    html += `<tr ondblclick="userView(${i})">
+      <td><strong>${escHtml(d.fullName||d.userName||'')}</strong></td>
+      <td>${escHtml(d.email||'')}</td>
+      <td><span class="badge badge-info">${escHtml(dictLabel('SYS_USER_TYPE', d.userType)||d.userType||'')}</span></td>
+      <td><span class="badge badge-02">${escHtml(d.role||'')}</span></td>
+      <td>${fmtDate(d.createAt||d.createdAt)}</td>
+      <td>
+        <button class="btn btn-secondary btn-xs" onclick="userView(${i})">詳細</button>
+        <button class="btn btn-primary btn-xs" onclick="userEdit(${i})">編集</button>
+        <button class="btn btn-danger btn-xs" onclick="userDel(${i})">削除</button>
+      </td></tr>`;
+  });
+  html += '</tbody></table></div>';
+  wrap.innerHTML = html;
+  renderPagination(wrap, userState.current, userState.pages, userState.total, userState.size, 'userLoad');
+}
+
+function userView(i) { userEditRow = userState.rows[i]; renderUserModal(true); }
+function userEdit(i) { userEditRow = userState.rows[i]; renderUserModal(false); }
+function userAdd() { userEditRow = {}; renderUserModal(false, true); }
+
+function renderUserModal(readOnly, isNew=false) {
+  const d = userEditRow || {};
+  const dis = readOnly ? 'disabled' : '';
+  const title = isNew ? 'ユーザー追加' : readOnly ? 'ユーザー詳細' : 'ユーザー編集';
+  const typeOpts = (dictMap['SYS_USER_TYPE']||[]).map(o=>`<option value="${o.value}" ${d.userType==o.value?'selected':''}>${o.label}</option>`).join('');
+
+  $('usr-modal').innerHTML = `<div class="modal-overlay" onclick="if(event.target===this)userCloseModal()">
+  <div class="modal modal-sm">
+    <div class="modal-header"><h2>${title}</h2><button class="modal-close" onclick="userCloseModal()">✕</button></div>
+    <div class="modal-body">
+
+      <div class="section-title">👤 基本情報</div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div class="form-group">
+          <label class="form-label required">ユーザーID（氏名）</label>
+          <input id="usr-fullName" class="form-control" value="${escHtml(d.fullName||'')}" ${dis} maxlength="50">
+        </div>
+        <div class="form-group">
+          <label class="form-label required">メールアドレス</label>
+          <input id="usr-email" type="email" class="form-control" value="${escHtml(d.email||'')}" ${dis} maxlength="255">
+        </div>
+        ${isNew||!readOnly?`<div class="form-group">
+          <label class="form-label">パスワード${isNew?'（必須）':''}</label>
+          <input id="usr-passwd" type="password" class="form-control" placeholder="${isNew?'パスワード入力':'変更する場合のみ入力'}" maxlength="100">
+        </div>`:''}
+        <div class="form-group">
+          <label class="form-label">ユーザー区分</label>
+          <select id="usr-userType" class="form-control" ${dis}><option value="">--</option>${typeOpts}</select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">ロール</label>
+          <input id="usr-role" class="form-control" value="${escHtml(d.role||'USER')}" ${dis} maxlength="20">
+        </div>
+      </div>
+      ${!readOnly && !isNew?`<div class="mt-3">
+        <button class="btn btn-warning btn-sm" onclick="userResetPwd(${JSON.stringify(d).replace(/"/g,'&quot;')})">🔒 パスワードリセット</button>
+      </div>`:''}
+
+    </div>
+    <div class="modal-footer">
+      ${!readOnly?`<button class="btn btn-primary" onclick="userSave(${isNew})">💾 保存する</button>`:''}
+      <button class="btn btn-secondary" onclick="userCloseModal()">閉じる</button>
+    </div>
+  </div></div>`;
+}
+
+function userCloseModal() { $('usr-modal').innerHTML = ''; userEditRow = null; }
+
+async function userSave(isNew) {
+  const fullName = $('usr-fullName').value;
+  const email = $('usr-email').value;
+  if (!fullName || !email) { toast('ユーザーIDとメールは必須です','error'); return; }
+  const passwdEl = $('usr-passwd');
+  const body = {
+    sysUser: {
+      id: isNew ? undefined : userEditRow.id,
+      fullName, email,
+      userPasswd: passwdEl ? passwdEl.value : '',
+      userType: $('usr-userType').value,
+      role: $('usr-role').value || 'USER',
+    }
+  };
+  const method = isNew ? 'POST' : 'PUT';
+  const r = await api('/sys/user', { method, body: JSON.stringify(body) });
+  if (r.success || r.success===undefined) { toast('保存しました'); userCloseModal(); userLoad(userState.current); }
+  else toast(r.message||'保存失敗','error');
+}
+async function userResetPwd(d) {
+  const ok = await confirm('パスワードリセット', `${d.fullName}のパスワードをリセットしますか？（password123 に変更）`);
+  if (!ok) return;
+  const r = await api('/auth/pwd/reset', { method:'POST', body: JSON.stringify({userId: d.id}) });
+  if (r.success || r.success===undefined) toast('パスワードをリセットしました');
+  else toast(r.message||'リセット失敗','error');
+  userCloseModal();
+}
+async function userDel(i) {
+  const rec = userState.rows[i];
+  const ok = await confirm('削除確認', `「${rec.fullName||rec.email}」を削除しますか？`);
+  if (!ok) return;
+  const r = await api(`/sys/user?id=${encodeURIComponent(rec.id)}`, { method:'DELETE' });
+  if (r.success || r.success===undefined) { toast('削除しました'); userLoad(userState.current); }
+  else toast(r.message||'削除失敗','error');
+}
+
+// ============================================================
+//  6. ロール管理 (SYS ROLE)
+// ============================================================
+let roleState = { current:1, size:10, total:0, pages:1, search:{}, rows:[] };
+let roleEditRow = null;
+
+function renderRole() {
+  $('content').innerHTML = `
+  <div class="card">
+    <div class="search-bar">
+      <div class="form-group">
+        <label class="form-label">役割名称</label>
+        <input id="rol-s-name" class="form-control" placeholder="役割名称で検索">
+      </div>
+      <div class="form-group">
+        <label class="form-label">役割コード</label>
+        <input id="rol-s-code" class="form-control" placeholder="役割コード">
+      </div>
+      <div style="display:flex;align-items:flex-end;gap:8px">
+        <button class="btn btn-primary" onclick="roleSearch()">🔍 検索</button>
+        <button class="btn btn-secondary" onclick="roleClear()">リセット</button>
+        <button class="btn btn-success" onclick="roleAdd()">＋ ロール追加</button>
+      </div>
+    </div>
+    <div id="rol-table-wrap"></div>
+  </div>
+  <div id="rol-modal"></div>`;
+  roleLoad(1);
+}
+async function roleLoad(page) {
+  roleState.current = page;
+  const r = await api('/sys/role/page', {
+    method:'POST', body: JSON.stringify({current:page, size:roleState.size})
+  });
+  if (!r.success) { toast('取得失敗','error'); return; }
+  roleState.total = r.data.total; roleState.pages = r.data.pages;
+  roleState.rows = r.data.records.map(rec => rec.sysRole || rec);
+  renderRoleTable();
+}
+function roleSearch() {
+  // Client-side filter
+  const name = $('rol-s-name').value.toLowerCase();
+  const code = $('rol-s-code').value.toLowerCase();
+  const $w = $('rol-table-wrap');
+  if ($w) {
+    $qa('tbody tr', $w).forEach(tr => {
+      const text = tr.textContent.toLowerCase();
+      tr.style.display = (!name || text.includes(name)) && (!code || text.includes(code)) ? '' : 'none';
+    });
+  }
+}
+function roleClear() { $('rol-s-name').value=''; $('rol-s-code').value=''; roleLoad(1); }
+
+function renderRoleTable() {
+  const wrap = $('rol-table-wrap');
+  let html = `<div class="table-wrap"><table>
+    <thead><tr><th>番号</th><th>役割名称</th><th>役割コード</th><th>役割タイプ</th><th>説明</th><th>作成日</th><th>操作</th></tr></thead><tbody>`;
+  roleState.rows.forEach((d, i) => {
+    html += `<tr ondblclick="roleView(${i})">
+      <td>${escHtml(String(d.id||''))}</td>
+      <td><strong>${escHtml(d.roleName||'')}</strong></td>
+      <td><code>${escHtml(d.roleCode||'')}</code></td>
+      <td>${escHtml(d.roleType||'')}</td>
+      <td>${escHtml(d.description||'')}</td>
+      <td>${fmtDate(d.createAt||d.createdAt)}</td>
+      <td>
+        <button class="btn btn-secondary btn-xs" onclick="roleView(${i})">詳細</button>
+        <button class="btn btn-primary btn-xs" onclick="roleEdit(${i})">編集</button>
+        <button class="btn btn-danger btn-xs" onclick="roleDel(${i})">削除</button>
+      </td></tr>`;
+  });
+  html += '</tbody></table></div>';
+  wrap.innerHTML = html;
+  renderPagination(wrap, roleState.current, roleState.pages, roleState.total, roleState.size, 'roleLoad');
+}
+
+function roleView(i) { roleEditRow = roleState.rows[i]; renderRoleModal(true); }
+function roleEdit(i) { roleEditRow = roleState.rows[i]; renderRoleModal(false); }
+function roleAdd() { roleEditRow = {}; renderRoleModal(false, true); }
+
+function renderRoleModal(readOnly, isNew=false) {
+  const d = roleEditRow || {};
+  const dis = readOnly ? 'disabled' : '';
+  const title = isNew ? 'ロール追加' : readOnly ? 'ロール詳細' : 'ロール編集';
+
+  $('rol-modal').innerHTML = `<div class="modal-overlay" onclick="if(event.target===this)roleCloseModal()">
+  <div class="modal modal-sm">
+    <div class="modal-header"><h2>${title}</h2><button class="modal-close" onclick="roleCloseModal()">✕</button></div>
+    <div class="modal-body">
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div class="form-group">
+          <label class="form-label required">役割名称</label>
+          <input id="rol-roleName" class="form-control" value="${escHtml(d.roleName||'')}" ${dis} maxlength="100">
+        </div>
+        <div class="form-group">
+          <label class="form-label required">役割コード</label>
+          <input id="rol-roleCode" class="form-control" value="${escHtml(d.roleCode||'')}" ${dis} maxlength="32">
+        </div>
+        <div class="form-group">
+          <label class="form-label">役割タイプ</label>
+          <input id="rol-roleType" class="form-control" value="${escHtml(d.roleType||'')}" ${dis} maxlength="32">
+        </div>
+        <div class="form-group">
+          <label class="form-label">説明</label>
+          <textarea id="rol-description" class="form-control" ${dis}>${escHtml(d.description||'')}</textarea>
+        </div>
+        ${!isNew?`
+        <div class="form-group">
+          <label class="form-label text-muted">作成者</label>
+          <input class="form-control" value="${escHtml(d.createUser||'')}" disabled>
+        </div>
+        <div class="form-group">
+          <label class="form-label text-muted">更新者</label>
+          <input class="form-control" value="${escHtml(d.updateUser||'')}" disabled>
+        </div>
+        <div class="form-group">
+          <label class="form-label text-muted">作成日時</label>
+          <input class="form-control" value="${escHtml(fmtDateTime(d.createAt))}" disabled>
+        </div>
+        <div class="form-group">
+          <label class="form-label text-muted">更新日時</label>
+          <input class="form-control" value="${escHtml(fmtDateTime(d.updateAt))}" disabled>
+        </div>`:''}
+      </div>
+    </div>
+    <div class="modal-footer">
+      ${!readOnly?`<button class="btn btn-primary" onclick="roleSave(${isNew})">💾 保存する</button>`:''}
+      <button class="btn btn-secondary" onclick="roleCloseModal()">閉じる</button>
+    </div>
+  </div></div>`;
+}
+
+function roleCloseModal() { $('rol-modal').innerHTML = ''; roleEditRow = null; }
+
+async function roleSave(isNew) {
+  const roleName = $('rol-roleName').value;
+  const roleCode = $('rol-roleCode').value;
+  if (!roleName || !roleCode) { toast('役割名称とコードは必須です','error'); return; }
+  const body = {
+    sysRole: {
+      id: isNew ? undefined : roleEditRow.id,
+      roleName, roleCode,
+      roleType: $('rol-roleType').value,
+      description: $('rol-description').value,
+    }
+  };
+  const method = isNew ? 'POST' : 'PUT';
+  const r = await api('/sys/role', { method, body: JSON.stringify(body) });
+  if (r.success || r.success===undefined) { toast('保存しました'); roleCloseModal(); roleLoad(roleState.current); }
+  else toast(r.message||'保存失敗','error');
+}
+async function roleDel(i) {
+  const rec = roleState.rows[i];
+  const ok = await confirm('削除確認', `「${rec.roleName}」を削除しますか？`);
+  if (!ok) return;
+  const r = await api(`/sys/role?id=${encodeURIComponent(rec.id)}`, { method:'DELETE' });
+  if (r.success || r.success===undefined) { toast('削除しました'); roleLoad(roleState.current); }
+  else toast(r.message||'削除失敗','error');
+}
+
+// ============================================================
+//  INIT — auto-login with stored token
+// ============================================================
+(async () => {
+  const storedToken = localStorage.getItem('token');
+  if (storedToken) {
+    token = storedToken;
+    try {
+      const r = await api('/sys/code/mapping/all');
+      if (r.success) {
+        dictMap = r.data;
+        $('login-page').style.display = 'none';
+        $('app').classList.remove('hidden');
+        const now = new Date();
+        $('topbar-date').textContent = now.toLocaleDateString('ja-JP', {year:'numeric',month:'long',day:'numeric'});
+        // try to get user info
+        try {
+          const lr = await fetch(API_BASE+'/auth/login', {
+            method:'POST', headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({email:'admin@rics.co.jp', password:'password123'})
+          });
+          const ld = await lr.json();
+          if (ld.success) {
+            token = ld.data.token;
+            localStorage.setItem('token', token);
+            $('user-name-disp').textContent = ld.data.userInfo.name;
+            $('user-role-disp').textContent = ld.data.userInfo.role;
+          }
+        } catch(e) {}
+        navigate('inquiry');
+        return;
+      }
+    } catch(e) {}
+    token = '';
+    localStorage.removeItem('token');
+  }
+})();
+</script>
+</body>
+</html>

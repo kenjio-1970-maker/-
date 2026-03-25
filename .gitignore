@@ -1,0 +1,42 @@
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build outputs
+.output/
+.nuxt/
+dist/
+output.zip
+
+# Database files (runtime data - regenerated on startup)
+poc/mock-api/poc_data.db
+poc/mock-api/uploads/
+
+# Environment & secrets
+.env
+.env.local
+.env.*.local
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Core dump files
+core
+core.*
+*.core
+
+# Editor
+.vscode/
+.idea/
+
+# Logs
+*.log
+logs/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo

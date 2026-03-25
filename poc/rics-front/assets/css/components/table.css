@@ -1,0 +1,12 @@
+/* 定义表格组件的样式 */
+.main-table-cls{
+    width: 100%; /* 设置表格宽度为100% */
+    height: calc(100% - 110px) !important; /* 减去底部换页和追加按钮和题头的高度 */
+    /*height: calc(100vh - 388px);  减去顶部栏的高度 */
+    /*margin: 0 auto; /* 设置表格居中对齐 */
+    /*border-radius: 10px; /* 设置表格圆角 */
+    /*overflow: hidden; /* 隐藏溢出内容 */
+    /*box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* 添加阴影效果 */
+    /*background-color: #fff; /* 设置背景颜色为白色 */
+    /*padding: 10px;  添加内边距 */
+}

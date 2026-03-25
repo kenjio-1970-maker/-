@@ -1,0 +1,22 @@
+/* 定义关于页面的样式 */
+/**
+每页页头标题
+ */
+.page-title-text {
+    font-size: 20px; /* Increased font size for better visibility */
+    font-weight: bold;
+    color: #96969e; /* Deep blue color for the title */
+    /* margin: 5px 25px; Adjusted margin for better spacing */
+    margin: 0px 25px 5px 25px; /* Adjusted margin for better spacing */
+    text-align: left; /* Align the title to the left */
+    line-height: 1.5; /* Improved line height for readability */
+}
+.page-title-text::after {
+    content: '';
+    display: inline-block;
+    width: 1px; /* 竖线宽度 */
+    height: 100%;
+    background-color: #bfc2cb; /* 竖线颜色 */
+    margin-left: 8px; /* 与标题的间距 */
+    height: 55%; /* 竖线高度 */
+  }

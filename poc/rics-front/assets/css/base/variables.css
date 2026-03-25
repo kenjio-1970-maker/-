@@ -1,0 +1,7 @@
+/* 定义全局变量（如颜色、字体大小等） */
+:root {
+  --width-zoom: 180px;
+  --width-zoom-1: 180px;
+  --width-zoom-2: 375px;
+  --width-zoom-3: 570px;
+  }

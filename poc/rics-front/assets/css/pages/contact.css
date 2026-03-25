@@ -1,0 +1,7 @@
+/* 定义页面公共的样式 */
+
+/* Detail页面分割横线样式 */
+.el-divider{
+    margin-top: 0px;
+    margin-bottom: 10px;
+}

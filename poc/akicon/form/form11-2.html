@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <title>アキコン｜実家じまい相談サービス</title>
+    <!-- meta情報 -->
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- noindex 検索させたくない時だけ入れる-->
+    <meta name="robots" content="noindex, nofollow" />
+    <!-- OGP情報 -->
+    <!-- ページのタイトル -->
+    <meta property="og:title" content="実家じまいのご相談は「アキコン」へ">
+    <!-- ページの説明 -->
+    <meta property="og:description" content="実家じまいサービスが提供する「アキコン」。無料相談、現地調査、相場レポート送付のお申込みはこちらから。">
+    <!-- ページのイメージ画像 -->
+    <meta property="og:image" content="https://akiconsys.com/akicon/akicon-ogp.png" />
+    <!-- ファビコン -->
+    <link rel="shortcut icon" href="https://akiconsys.com/akicon/favicon.ico" />
+    <!-- iOSデバイス（iPhone・iPad） で Webサイトをホーム画面に追加したときに表示されるアイコン を指定するタグ -->
+    <link rel="apple-touch-icon" href="../apple-touch-icon.png" />
+    <link rel="icon" type="image/png" href="../android-chrome-192x192.png" />
+    <!-- Googleフォント -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Noto+Sans+JP:wght@100..900&family=Noto+Serif+JP:wght@200..900&display=swap"
+      rel="stylesheet"
+    />
+    <!-- css -->
+    <link href="../css/reset.css" rel="stylesheet" />
+    <link href="../css/form.css" rel="stylesheet" />
+    <script type="module" defer src="../js/checkTokenExists.js"></script>
+    <script type="module" defer src="../js/form11-2.js"></script>
+  </head>
+
+  <body class="slide__body">
+
+      <!-- ヘッダー -->
+      <header class="header form__header">
+        <h1 class="header__logo aki-logo"><img src="../images/aki-logo.png" alt="アキコン" /></h1>
+        <div class="form__title-wrapper">
+          <h2 class="form__title">実家じまい相談フォーム</h2>
+              <p class="form__title-text">下記フォームからお客様のご実家に関する情報をご入力ください。</p>
+        </div>
+      </header>
+      <main>
+        <div class="inner">
+        <section class="form__container">
+          <div class="form__bg">
+            <div class="inner form__inner">
+              <div class="form__box">
+                <div class="box__bg">
+                  <div class="box__inner">
+                    <div class="form11__box">
+                      <div class="form__inner">
+                        <div class="form11__label">
+                          <p>(4)ご実家のご住所を教えてください。<span class="form__q-span">(必須)</span></p>
+                          <div class="form11__address">
+                            <div class="form11__address-post">
+                              <label>〒</label>
+                              <div class="form11-2__post">
+                                <input type="text" class="post-code" maxlength="3" size="3" name="Q11(4)-1-start"> 
+                                <span class="post-hyphen">ー</span>
+                                <input type="text" class="post-code02" maxlength="4" size="4" name="Q11(4)-1-end">
+                              </div>
+                              <button class="form11-2__post-search" type="button" onclick="fetchAndPopulateAddress()">検索</button>
+                            </div>
+                            <div class="form11__address-box">
+                              <label>住所</label>
+                                <input type="text" class="address-text" name="Q11(4)-2" maxlength="300" placeholder="東京都**区**" disabled>
+                            </div>
+                            <div class="form11__address-box">
+                              <label>番地以降</label>
+                                <input type="text" class="address-text" name="Q11(4)-3" maxlength="50" placeholder="1-1-1">
+                            </div>
+                          </div>
+                        </div>
+                        <div class="form11__label">
+                          <label>(5)ご実家の地番を教えてください。<span class="form__q-span">(必須)</span></label>
+                          <p class="form11__label-text">※家屋が立つ土地の地番を指します。固定資産税の納付書などを確認し、正確にご入力ください。不明な場合は「不明」とご入力ください。</p>
+                        </div>
+                        <div class="form11__details">
+                          <input type="text" required placeholder="ご記入ください" name="Q11(5)" class="form11__details-text" maxlength="255">
+                          <!--<span class="form11__details-text-span">0/255</span>-->
+                        </div>
+                        <div class="form11__label">
+                          <label>(6)ご実家の特徴をお聞かせください。<span>(任意)</span></label>
+                          <p class="form11__label-text">※屋根の色や外観の特徴、角の家から何軒目など</p>
+                        </div>
+                        <div class="form11__details">
+                          <input type="text" placeholder="ご記入ください" name="Q11(6)" class="form11__details-text" maxlength="255">
+                          <!--<span class="form11__details-text-span">0/255</span>-->
+                        </div>
+                        <div class="form11__label">
+                          <label>(7)どのようなお悩みを抱えてますか?差し支えなければお聞かせください。<span>(任意)</span>
+                          </label>
+                        </div>
+                        <div class="form11__details">
+                          <input type="text" placeholder="ご記入ください" name="Q11(7)" class="form11__details-text" maxlength="255">
+                          <!--<span class="form11__details-text-span">0/255</span>-->
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+        </div>
+      </main>
+      <footer class="slide__footer form__footer">
+        <a href="../slide00/" class="top__btn" onclick="return showConfirmModal()">トップページ</a>
+        <div>
+          <a href="../form/form11-1.html" class="back__btn">もどる</a>
+          <a href="../form/form12.html" class="next__btn">すすむ</a>
+        </div>
+      </footer>
+      <!-- 引入确认模态框 -->
+      <div id="confirmModalContainer"></div>
+
+  </body>
+</html>
